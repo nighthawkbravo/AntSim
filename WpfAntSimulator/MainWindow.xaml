@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:WpfAntSimulator"
         mc:Ignorable="d"
         Title="MainWindow" Height="900" Width="1500" ResizeMode="NoResize">
-    <Grid Background="#FF909090">
+    <Grid Background="#FF828282">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1150"/>
             <ColumnDefinition Width="8"/>
