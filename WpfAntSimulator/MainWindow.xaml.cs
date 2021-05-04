@@ -21,19 +21,28 @@ using Color = System.Drawing.Color;
 using Point = System.Drawing.Point;
 using System.IO;
 using System.Drawing.Imaging;
+using WpfAntSimulator.SimObjects;
 
 namespace WpfAntSimulator
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
+    public enum Direction
+    {
+        Left,   // 0
+        Up,     // 1
+        Right,  // 2
+        Down    // 3
+    }
+
     public partial class MainWindow : Window
     {
 
         private const int width = 1127;
         private const int height = 814;
 
-        //private List<ISimObject> simObjects;
+        private int numOfAnts;
+
+        private List<ISimObject> simObjects;
+
         private Bitmap bm;
 
         private string mylightRed = "#FF5555";
@@ -41,31 +50,51 @@ namespace WpfAntSimulator
 
         public delegate void nextSimulationTick();
         private bool continueCalculating;
-        
+        private bool simInit = false;
+
+        private Random rnd;
+        private Point center = new Point(1126 / 2, 814 / 2);
+
+
+
 
         public MainWindow()
         {
             InitializeComponent();
-            //simObjects = new List<ISimObject>();
-            bm = new Bitmap(width, height);
+            rnd = new Random();
+            simObjects = new List<ISimObject>();
 
-            //bm.SetPixel((int)1127 / 2, (int) 814 / 2, Color.White);
-            //blah();
-            
-            DisplayImage(bm);
+            numOfAnts = Int32.Parse(AntAmount.Text);
+            simObjects.Add(new Colony(center));
+
+
+            RenderAll();
         }
 
-        private void blah()
+        private void UpdateAll()
         {
-            for(int i=100; i < 800; ++i)
+            foreach (var simObj in simObjects)
             {
-                for (int j = 100; j < 800; ++j)
-                {
-                    bm.SetPixel(i, j, Color.White);
-                }
+                simObj.Update();
             }
         }
 
+        private void RenderAll()
+        {
+            bm = new Bitmap(width, height);
+            foreach (var simObj in simObjects)
+            {
+                simObj.Render(bm);
+            }
+            DisplayImage(bm);
+        }
+        private void InitSim()
+        {
+            for (int i=0; i<numOfAnts; ++i)
+            {
+                simObjects.Add(new Ant(NumToDir(rnd.Next(4)), center));
+            }
+        }
         private void StartOrStopSimButton(object sender, RoutedEventArgs e)
         {
             if (continueCalculating)
@@ -83,9 +112,28 @@ namespace WpfAntSimulator
             }
         }
 
+        private void AntAmountChange(object sender, TextChangedEventArgs e)
+        {
+            int i;
+            if(Int32.TryParse(AntAmount.Text, out i))
+            {
+                numOfAnts = i;
+            }
+        }
+
+
+
         public void RunNextTick()
         {
-            // Here the engine will render
+            if (!simInit)
+            {
+                InitSim();
+                //simInit = true;
+            }
+
+            UpdateAll();
+
+            RenderAll();
 
             if (continueCalculating)
             {
@@ -101,6 +149,19 @@ namespace WpfAntSimulator
 
 
 
+        private Direction NumToDir(int i)
+        {
+            switch (i)
+            {
+                case 0:
+                    return Direction.Left;
+                case 1:
+                    return Direction.Up;
+                case 2:
+                    return Direction.Right;
+            }
+            return Direction.Down;
+        }
 
         private void DisplayImage(Bitmap b)
         {
