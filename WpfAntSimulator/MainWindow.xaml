@@ -20,7 +20,7 @@
             <TextBlock Grid.Row="0" Text="Simulation Space" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18" FontWeight="Bold"/>
             <Border Grid.Row="1" BorderBrush="Black" BorderThickness="1">
                 <Grid Background="black">
-                    <Image Name="myImage" Width="1127" Height="814" RenderTransformOrigin="0.5,0.5">
+                    <Image Name="myImage" Width="1127" Height="814" RenderTransformOrigin="0.5,0.5" MouseLeftButtonDown="myImage_MouseLeftButtonDown">
                         <Image.RenderTransform>
                             <TransformGroup>
                                 <ScaleTransform ScaleX="-1"/>
@@ -63,6 +63,45 @@
                         <TextBox Name="AntAmount"  Grid.Column="1" Margin="5" Background="#FFD9D9D9" Text="100"  HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="18" TextChanged="AntAmountChange"/>
                     </Grid>
 
+                    <!-- Placing rectangular obstacles -->
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="100"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Margin="5" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center">Create obstacle:</TextBlock>
+                        <Button Grid.Column="1" Name="SelectObstacle" Margin="5" Content="Select" Click="SelectObstacle_Click"/>
+                    </Grid>
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="80"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"  Margin="5" FontSize="18" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center">Width:</TextBlock>
+                        <TextBox Name="ObstacleWidth" Grid.Column="1" Margin="5" Background="#FFD9D9D9" Text="50"  HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="18" PreviewTextInput="PreviewTextInput"></TextBox>
+                        <TextBlock Grid.Column="2"  Margin="5" FontSize="18" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center">Height:</TextBlock>
+                        <TextBox Name="ObstacleHeight" Grid.Column="3" Margin="5" Background="#FFD9D9D9" Text="50"  HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="18" PreviewTextInput="PreviewTextInput"></TextBox>
+                    </Grid>
+
+                    <!-- Placing the nest-->
+                    <Grid Grid.Row="3">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="100"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Margin="5" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center">Create Nest:</TextBlock>
+                        <Button Grid.Column="1" Name="SelectNest" Margin="5" Content="Select" Click="SelectNest_Click"/>
+                    </Grid>
+                    <Grid Grid.Row="4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Margin="5" FontSize="18" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center">Radius:</TextBlock>
+                        <TextBox Name="NestRadius" Width="80" HorizontalAlignment="Left" Grid.Column="1" Margin="5" Background="#FFD9D9D9" Text="100"  HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="18" PreviewTextInput="PreviewTextInput"/>
+                    </Grid>
 
                     <Grid Grid.Row="7">
                         <Grid.ColumnDefinitions>

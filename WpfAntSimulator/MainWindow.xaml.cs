@@ -22,6 +22,7 @@ using Point = System.Drawing.Point;
 using System.IO;
 using System.Drawing.Imaging;
 using WpfAntSimulator.SimObjects;
+using System.Text.RegularExpressions;
 
 namespace WpfAntSimulator
 {
@@ -55,7 +56,9 @@ namespace WpfAntSimulator
         private Random rnd;
         private Point center = new Point(1126 / 2, 814 / 2);
 
+        private static readonly Regex _regex = new Regex("[^0-9]+"); //regex that matches disallowed text
 
+        private ISimObject selectedObject;
 
 
         public MainWindow()
@@ -128,7 +131,7 @@ namespace WpfAntSimulator
             if (!simInit)
             {
                 InitSim();
-                //simInit = true;
+                simInit = true;
             }
 
             UpdateAll();
@@ -186,5 +189,49 @@ namespace WpfAntSimulator
                 return bitmapImage;
             }
         }
+        private static bool IsTextAllowed(string text)
+        {
+            return !_regex.IsMatch(text);
+        }
+
+        private void PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !IsTextAllowed(e.Text);
+        }
+
+        private void SelectObstacle_Click(object sender, RoutedEventArgs e)
+        {
+            selectedObject = new Obstacle();
+        }
+        private void SelectNest_Click(object sender, RoutedEventArgs e)
+        {
+            selectedObject = new Colony();
+        }
+
+        private void myImage_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            selectedObject.Position = new Point((int)e.GetPosition(myImage).X, (int)e.GetPosition(myImage).Y);
+            ISimObject nextSimObj;
+            switch (selectedObject)
+            {
+                case Obstacle obstacle:
+                    (selectedObject as Obstacle).Width = Int32.Parse(ObstacleWidth.Text);
+                    (selectedObject as Obstacle).Height = Int32.Parse(ObstacleHeight.Text);
+                    nextSimObj = new Obstacle();
+                    break;
+                case Colony colony:
+                    (selectedObject as Colony).Radius = Int32.Parse(NestRadius.Text);
+                    nextSimObj = new Colony();
+                    break;
+                default:
+                    return;
+            }
+
+            simObjects.Add(selectedObject);
+            selectedObject = nextSimObj;
+            RenderAll();
+        }
+
+
     }
 }
