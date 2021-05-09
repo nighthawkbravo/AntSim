@@ -25,13 +25,29 @@ using WpfAntSimulator.SimObjects;
 
 namespace WpfAntSimulator
 {
-    public enum Direction
+    public static class Globals
     {
-        Left,   // 0
-        Up,     // 1
-        Right,  // 2
-        Down    // 3
-    }
+        public enum Direction
+        {
+            north,
+            northeast,
+            east,
+            southeast,
+            south,
+            southwest,
+            west,
+            northwest,
+            center
+        }
+
+        public static List<Direction> directions = new List<Direction>()
+        { Direction.north, Direction.northeast, Direction.east, Direction.southeast, Direction.south, Direction.southwest, Direction.west, Direction.northwest, Direction.center, Direction.center};
+
+        public static Direction NumToDir(int i)
+        {
+            return directions[i];
+        }
+    }      
 
     public partial class MainWindow : Window
     {
@@ -53,6 +69,8 @@ namespace WpfAntSimulator
         private bool simInit = false;
 
         private Random rnd;
+        
+
         private Point center = new Point(1126 / 2, 814 / 2);
 
 
@@ -61,14 +79,10 @@ namespace WpfAntSimulator
         public MainWindow()
         {
             InitializeComponent();
-            rnd = new Random();
             simObjects = new List<ISimObject>();
+            rnd = new Random(Guid.NewGuid().GetHashCode());
 
             numOfAnts = Int32.Parse(AntAmount.Text);
-            simObjects.Add(new Colony(center));
-
-
-            RenderAll();
         }
 
         private void UpdateAll()
@@ -78,7 +92,6 @@ namespace WpfAntSimulator
                 simObj.Update();
             }
         }
-
         private void RenderAll()
         {
             bm = new Bitmap(width, height);
@@ -90,9 +103,12 @@ namespace WpfAntSimulator
         }
         private void InitSim()
         {
+            simObjects.Add(new Colony(center));
             for (int i=0; i<numOfAnts; ++i)
             {
-                simObjects.Add(new Ant(NumToDir(rnd.Next(4)), center));
+                // Random rand = new Random(Guid.NewGuid().GetHashCode()); // Very useful for generating random objects with random seeds!
+                simObjects.Add(new Ant(Globals.NumToDir(rnd.Next(Globals.directions.Count)), center, new Random(Guid.NewGuid().GetHashCode())));
+                
             }
         }
         private void StartOrStopSimButton(object sender, RoutedEventArgs e)
@@ -111,7 +127,6 @@ namespace WpfAntSimulator
                     new nextSimulationTick(RunNextTick));
             }
         }
-
         private void AntAmountChange(object sender, TextChangedEventArgs e)
         {
             int i;
@@ -120,21 +135,27 @@ namespace WpfAntSimulator
                 numOfAnts = i;
             }
         }
+        private void ResetSimButton(object sender, RoutedEventArgs e)
+        {
+            simObjects.Clear();
+            simInit = false;
+            RenderAll();
+        }
 
 
-
+        // This function is the engine.
         public void RunNextTick()
         {
             if (!simInit)
             {
                 InitSim();
-                //simInit = true;
+                simInit = true;
             }
 
             UpdateAll();
 
             RenderAll();
-
+            System.Threading.Thread.Sleep(10);
             if (continueCalculating)
             {
                 StartOrStopButton.Dispatcher.BeginInvoke(
@@ -146,28 +167,11 @@ namespace WpfAntSimulator
 
 
 
-
-
-
-        private Direction NumToDir(int i)
-        {
-            switch (i)
-            {
-                case 0:
-                    return Direction.Left;
-                case 1:
-                    return Direction.Up;
-                case 2:
-                    return Direction.Right;
-            }
-            return Direction.Down;
-        }
-
+        // Displays image from bitmap.
         private void DisplayImage(Bitmap b)
         {
             myImage.Source = Bitmap2BitmapImage(b); ;
         }
-
         // Converts Bitmaps to BitmapImages.
         private BitmapImage Bitmap2BitmapImage(Bitmap bitmap)
         {
