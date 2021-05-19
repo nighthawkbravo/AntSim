@@ -23,6 +23,7 @@ using System.IO;
 using System.Drawing.Imaging;
 using WpfAntSimulator.SimObjects;
 using System.Text.RegularExpressions;
+using System.Drawing;
 
 namespace WpfAntSimulator
 {
@@ -127,12 +128,14 @@ namespace WpfAntSimulator
 
         private void RenderAll()
         {
-            bm = bmStatic;
+            bm = new Bitmap(width, height);            
+            //bm = bmStatic;
             foreach (var simObj in simObjects)
             {
                 simObj.Render(bm);
             }
-            DisplayImage(bm);
+            var res = MergedBitmaps(bmStatic, bm);
+            DisplayImage(res);
         }
         private void InitSim()
         {
@@ -307,6 +310,18 @@ namespace WpfAntSimulator
             if (a.X != b.X) return true;
             if (a.Y != b.Y) return true;
             return false;
+        }
+
+        private Bitmap MergedBitmaps(Bitmap bmp1, Bitmap bmp2)
+        {
+            Bitmap result = new Bitmap(Math.Max(bmp1.Width, bmp2.Width),
+                                       Math.Max(bmp1.Height, bmp2.Height));
+            using (Graphics g = Graphics.FromImage(result))
+            {
+                g.DrawImage(bmp2, Point.Empty);
+                g.DrawImage(bmp1, Point.Empty);
+            }
+            return result;
         }
 
     }
