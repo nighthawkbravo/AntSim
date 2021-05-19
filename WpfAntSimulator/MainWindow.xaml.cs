@@ -26,13 +26,33 @@ using System.Text.RegularExpressions;
 
 namespace WpfAntSimulator
 {
-    public enum Direction
+    public static class Globals
     {
-        Left,   // 0
-        Up,     // 1
-        Right,  // 2
-        Down    // 3
-    }
+        public enum Direction
+        {
+            north,
+            northeast,
+            east,
+            southeast,
+            south,
+            southwest,
+            west,
+            northwest,
+            center
+        }
+
+        public static List<Direction> directions = new List<Direction>()
+        { Direction.northwest, Direction.north, Direction.northeast, Direction.east,    // 0, 1, 2, 3
+          Direction.southeast, Direction.south, Direction.southwest,                    // 4, 5, 6
+          Direction.west, Direction.northwest, Direction.north,                         // 7, 8, 9
+          Direction.center, Direction.center                                            // 10, 11
+        };
+
+        public static Direction NumToDir(int i)
+        {
+            return directions[i];
+        }        
+    }      
 
     public partial class MainWindow : Window
     {
@@ -41,8 +61,6 @@ namespace WpfAntSimulator
         private const int height = 814;
 
         private int numOfAnts;
-
-        private List<ISimObject> simObjects;
 
         private Bitmap bm;
 
@@ -54,6 +72,9 @@ namespace WpfAntSimulator
         private bool simInit = false;
 
         private Random rnd;
+
+        private List<ISimObject> toBeRemoved = new List<ISimObject>();
+        private List<ISimObject> simObjects;
         private Point center = new Point(1126 / 2, 814 / 2);
 
         private static readonly Regex _regex = new Regex("[^0-9]+"); //regex that matches disallowed text
@@ -64,24 +85,32 @@ namespace WpfAntSimulator
         public MainWindow()
         {
             InitializeComponent();
-            rnd = new Random();
             simObjects = new List<ISimObject>();
+            rnd = new Random(Guid.NewGuid().GetHashCode());
 
             numOfAnts = Int32.Parse(AntAmount.Text);
-            simObjects.Add(new Colony(center));
-
-
-            RenderAll();
         }
 
         private void UpdateAll()
         {
             foreach (var simObj in simObjects)
             {
+                if (!simObj.ShouldBeRendered())
+                {
+                    toBeRemoved.Add(simObj);
+                    continue;
+                }
                 simObj.Update();
             }
+            if (toBeRemoved.Count > 0)
+            {
+                foreach (var o in toBeRemoved)
+                {
+                    simObjects.Remove(o);
+                }
+                toBeRemoved.Clear();
+            }
         }
-
         private void RenderAll()
         {
             bm = new Bitmap(width, height);
@@ -93,9 +122,12 @@ namespace WpfAntSimulator
         }
         private void InitSim()
         {
+            simObjects.Add(new Colony(center));
             for (int i=0; i<numOfAnts; ++i)
             {
-                simObjects.Add(new Ant(NumToDir(rnd.Next(4)), center));
+                // Random rand = new Random(Guid.NewGuid().GetHashCode()); // Very useful for generating random objects with random seeds!
+                simObjects.Add(new Ant(Globals.NumToDir(rnd.Next(Globals.directions.Count)), center, new Random(Guid.NewGuid().GetHashCode())));
+                
             }
         }
         private void StartOrStopSimButton(object sender, RoutedEventArgs e)
@@ -114,7 +146,6 @@ namespace WpfAntSimulator
                     new nextSimulationTick(RunNextTick));
             }
         }
-
         private void AntAmountChange(object sender, TextChangedEventArgs e)
         {
             int i;
@@ -123,9 +154,15 @@ namespace WpfAntSimulator
                 numOfAnts = i;
             }
         }
+        private void ResetSimButton(object sender, RoutedEventArgs e)
+        {
+            simObjects.Clear();
+            simInit = false;
+            RenderAll();
+        }
 
 
-
+        // This function is the engine.
         public void RunNextTick()
         {
             if (!simInit)
@@ -137,7 +174,7 @@ namespace WpfAntSimulator
             UpdateAll();
 
             RenderAll();
-
+            System.Threading.Thread.Sleep(8);
             if (continueCalculating)
             {
                 StartOrStopButton.Dispatcher.BeginInvoke(
@@ -149,28 +186,11 @@ namespace WpfAntSimulator
 
 
 
-
-
-
-        private Direction NumToDir(int i)
-        {
-            switch (i)
-            {
-                case 0:
-                    return Direction.Left;
-                case 1:
-                    return Direction.Up;
-                case 2:
-                    return Direction.Right;
-            }
-            return Direction.Down;
-        }
-
+        // Displays image from bitmap.
         private void DisplayImage(Bitmap b)
         {
             myImage.Source = Bitmap2BitmapImage(b); ;
         }
-
         // Converts Bitmaps to BitmapImages.
         private BitmapImage Bitmap2BitmapImage(Bitmap bitmap)
         {

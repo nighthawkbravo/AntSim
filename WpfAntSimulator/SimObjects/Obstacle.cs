@@ -51,5 +51,9 @@ namespace WpfAntSimulator.SimObjects
         {
 
         }
+        public bool ShouldBeRendered()
+        {
+            return true;
+        }
     }
 }

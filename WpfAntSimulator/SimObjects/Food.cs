@@ -9,7 +9,7 @@ using Bitmap = System.Drawing.Bitmap;
 
 namespace WpfAntSimulator.SimObjects
 {
-    class Food : ISimObject
+    public class Food : ISimObject
     {
         public int FoodAmount { get; set; }
 
@@ -31,6 +31,10 @@ namespace WpfAntSimulator.SimObjects
         public void Enlarge(Bitmap bm)
         {
 
+        }
+        public bool ShouldBeRendered()
+        {
+            return true;
         }
     }
 }

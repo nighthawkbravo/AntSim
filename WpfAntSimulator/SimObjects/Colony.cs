@@ -27,40 +27,6 @@ namespace WpfAntSimulator.SimObjects
             MyColor = Color.Violet;
         }
 
-        public bool IsInBound(int x, int y, Bitmap bm)
-        {
-            if (x > 0 && x < bm.Width && y > 0 && y < bm.Height)
-            {
-                return true;
-            }
-            return false;
-        }
-
-
-        public void Update()
-        {
-
-        }
-
-        private double CalcEucliDist(Point p1, Point p2)
-        {
-            return Math.Sqrt(Math.Pow(p2.Y - p1.Y, 2) + Math.Pow(p2.X - p1.X, 2));
-        }
-        private double D(int r, int y)
-        {
-            return Math.Ceiling(Math.Sqrt(r * r - y * y)) - Math.Sqrt(r * r - y * y);
-        }
-        public void ColorPixel(int x, int y, Color c, Bitmap bm)
-        {
-            if (!IsInBound(x, y, bm)) return;
-            bm.SetPixel(x, y, c);
-        }
-        public void ColorPixel(int x, int y, Bitmap bm)
-        {
-            if (!IsInBound(x, y, bm)) return;
-            bm.SetPixel(x, y, MyColor);
-        }
-
         private Bitmap midPointCircleDraw(int x_centre, int y_centre, int r, Bitmap bm)
         {
             int x = r, y = 0;
@@ -99,6 +65,39 @@ namespace WpfAntSimulator.SimObjects
             }
             return bm;
         }
+        
+        public void Update()
+        {
+
+        }
+
+        private double CalcEucliDist(Point p1, Point p2)
+        {
+            return Math.Sqrt(Math.Pow(p2.Y - p1.Y, 2) + Math.Pow(p2.X - p1.X, 2));
+        }
+        private double D(int r, int y)
+        {
+            return Math.Ceiling(Math.Sqrt(r * r - y * y)) - Math.Sqrt(r * r - y * y);
+        }
+        public void ColorPixel(int x, int y, Color c, Bitmap bm)
+        {
+            if (!IsInBound(x, y, bm)) return;
+            bm.SetPixel(x, y, c);
+        }
+        public void ColorPixel(int x, int y, Bitmap bm)
+        {
+            if (!IsInBound(x, y, bm)) return;
+            bm.SetPixel(x, y, MyColor);
+        }
+        
+        public bool IsInBound(int x, int y, Bitmap bm)
+        {
+            if (x > 0 && x < bm.Width && y > 0 && y < bm.Height)
+            {
+                return true;
+            }
+            return false;
+        }
 
         public void Render(Bitmap bm)
         {
@@ -126,6 +125,10 @@ namespace WpfAntSimulator.SimObjects
             bm.SetPixel(Position.X + 1, Position.Y, MyColor);
             bm.SetPixel(Position.X, Position.Y + 1, MyColor);
             bm.SetPixel(Position.X, Position.Y - 1, MyColor);
+        }
+        public bool ShouldBeRendered()
+        {
+            return true;
         }
     }
 }

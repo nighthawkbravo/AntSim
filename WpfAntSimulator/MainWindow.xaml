@@ -111,7 +111,7 @@
                         <Button Grid.Column="0" Margin="5" Click="StartOrStopSimButton" Name="StartOrStopButton">
                             <TextBlock Name="StartOrStopText" FontSize="18" FontWeight="Bold">Start</TextBlock> <!-- This text will change based on the app running or not-->
                         </Button>
-                        <Button Grid.Column="1" Margin="5">
+                        <Button Grid.Column="1" Margin="5" Click="ResetSimButton">
                             <TextBlock FontSize="18" FontWeight="Bold">Reset</TextBlock>
                         </Button>
                     </Grid>
