@@ -89,6 +89,7 @@ namespace WpfAntSimulator
             rnd = new Random(Guid.NewGuid().GetHashCode());
 
             numOfAnts = Int32.Parse(AntAmount.Text);
+            RenderAll();
         }
 
         private void UpdateAll()
