@@ -53,6 +53,15 @@ namespace WpfAntSimulator
             return result;
         }
 
+        public bool IsInBound(int x, int y, Bitmap bm)
+        {
+            if (x > 0 && x < bm.Width && y > 0 && y < bm.Height)
+            {
+                return true;
+            }
+            return false;
+        }
+
         // ################## Event handlers ##################
 
         private void SelectObstacle_Click(object sender, RoutedEventArgs e)
@@ -63,7 +72,25 @@ namespace WpfAntSimulator
         {
             selectedObject = new Colony();
         }
+        private void SelectFood_Click(object sender, RoutedEventArgs e)
+        {
+            selectedObject = new Food();
+        }
 
+        private void CreateFood(Point point,int width, int height)
+        {
+            //for (int x = Convert.ToInt32(Position.X - (Width / 2)); x < Convert.ToInt32(Position.X + (Width / 2)); x++)
+            //{
+            //    for (int y = Convert.ToInt32(Position.Y - (Height / 2)); y < Convert.ToInt32(Position.Y + (Height / 2)); y++)
+            //        if (!IsInBound(x, y, bm)) return;
+            //        else
+            //            bm.SetPixel(x, y, MyColor);
+            //}
+            for (int x = point.X - (width/2);x<point.X+(width/2);x++)
+                for (int y = point.Y - (height / 2); y < point.Y + (height / 2); y++)
+                    if (IsInBound(x, y, bm))
+                        simStaticObjects.Add(new Food(new Point(x, y)));
+        }
         private void myImage_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (selectedObject == null) return;
@@ -105,6 +132,11 @@ namespace WpfAntSimulator
                     }
 
                     break;
+                case Food food:
+                    CreateFood(selectedObject.Position,Int32.Parse(FoodWidth.Text),Int32.Parse(FoodHeight.Text));
+                    RenderStatics();
+                    RenderAll();
+                    return;
                 default:
                     return;
             }
