@@ -15,7 +15,7 @@ namespace WpfAntSimulator.SimObjects
         public Point PrevPosition { get; set; } // Maybe this won't be neccessary
 
         private const int width = 1127;
-        private const int height = 814;
+        private const int height = 814; // 814
         private Random rnd;
         private int multiplyer = 1;
         private int lifeSpan;
@@ -33,7 +33,7 @@ namespace WpfAntSimulator.SimObjects
             Position = start;
             MyColor = Color.White;
             rnd = r;
-            lifeSpan = r.Next(1,200)*20;
+            lifeSpan = r.Next(1,201)*20;
         }
 
         public bool ShouldBeRendered()
@@ -44,6 +44,7 @@ namespace WpfAntSimulator.SimObjects
             }
             return true;
         }
+
         public void Update()
         {
             lifeSpan--;
@@ -51,46 +52,37 @@ namespace WpfAntSimulator.SimObjects
             switch (dir)
             {
                 case Direction.west:
-                    UpdatePos(-1, 0);
-                    dir = WillIChange(dir);
+                    UpdatePos(-1, 0);                    
                     break;
                 case Direction.northwest:
                     UpdatePos(-1, 1);
-                    dir = WillIChange(dir);
                     break;
                 case Direction.north:
                     UpdatePos(0, 1);
-                    dir = WillIChange(dir);
                     break;
                 case Direction.northeast:
                     UpdatePos(1, 1);
-                    dir = WillIChange(dir);
                     break;
                 case Direction.east:
                     UpdatePos(1, 0);
-                    dir = WillIChange(dir);
                     break;
                 case Direction.southeast:
                     UpdatePos(1, -1);
-                    dir = WillIChange(dir);
                     break;
                 case Direction.south:
                     UpdatePos(0, -1);
-                    dir = WillIChange(dir);
                     break;
                 case Direction.southwest:
                     UpdatePos(-1, -1);
-                    dir = WillIChange(dir);
                     break;
                 case Direction.center:
-                    //UpdatePos(-1, -1);
-                    dir = WillIChange(dir);
                     break;
             }
+            dir = WillIChange(dir);
         }
         private Direction WillIChange(Direction dir)
         {
-            if (rnd.Next(6) < 3)
+            if (rnd.Next(7) < 3) // 0 - 6
             {
                 //return Globals.directions[rnd.Next(Globals.directions.Count)];
 
