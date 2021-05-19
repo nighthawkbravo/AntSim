@@ -63,6 +63,7 @@ namespace WpfAntSimulator
         private int numOfAnts;
 
         private Bitmap bm;
+        private Bitmap bmStatic;
 
         private string mylightRed = "#FF5555";
         private string mylightGreen = "#42f548";
@@ -75,6 +76,7 @@ namespace WpfAntSimulator
 
         private List<ISimObject> toBeRemoved = new List<ISimObject>();
         private List<ISimObject> simObjects;
+        private List<ISimObject> simStaticObjects = new List<ISimObject>();
         private Point center = new Point(1126 / 2, 814 / 2);
 
         private static readonly Regex _regex = new Regex("[^0-9]+"); //regex that matches disallowed text
@@ -89,6 +91,7 @@ namespace WpfAntSimulator
             rnd = new Random(Guid.NewGuid().GetHashCode());
 
             numOfAnts = Int32.Parse(AntAmount.Text);
+            bmStatic = new Bitmap(width, height);
             RenderAll();
         }
 
@@ -112,9 +115,19 @@ namespace WpfAntSimulator
                 toBeRemoved.Clear();
             }
         }
+        private void RenderStatics()
+        {
+            bmStatic = new Bitmap(width, height);
+
+            foreach (var simObj in simStaticObjects)
+            {
+                simObj.Render(bmStatic);
+            }
+        }
+
         private void RenderAll()
         {
-            bm = new Bitmap(width, height);
+            bm = bmStatic;
             foreach (var simObj in simObjects)
             {
                 simObj.Render(bm);
@@ -140,6 +153,7 @@ namespace WpfAntSimulator
             }
             else
             {
+                selectedObject = null;
                 continueCalculating = true;
                 StartOrStopText.Text = "Stop";
                 StartOrStopButton.Dispatcher.BeginInvoke(
@@ -158,7 +172,9 @@ namespace WpfAntSimulator
         private void ResetSimButton(object sender, RoutedEventArgs e)
         {
             simObjects.Clear();
+            simStaticObjects.Clear();
             simInit = false;
+            RenderStatics();
             RenderAll();
         }
 
@@ -170,6 +186,7 @@ namespace WpfAntSimulator
             {
                 InitSim();
                 simInit = true;
+                
             }
 
             UpdateAll();
@@ -231,28 +248,66 @@ namespace WpfAntSimulator
 
         private void myImage_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            if (selectedObject == null) return;
+
+            bool changeWasMade = false;
+            var prevSelectedObject = selectedObject;
+            Point prevPos = selectedObject.Position;
+
             selectedObject.Position = new Point((int)e.GetPosition(myImage).X, (int)e.GetPosition(myImage).Y);
-            ISimObject nextSimObj;
             switch (selectedObject)
             {
                 case Obstacle obstacle:
-                    (selectedObject as Obstacle).Width = Int32.Parse(ObstacleWidth.Text);
-                    (selectedObject as Obstacle).Height = Int32.Parse(ObstacleHeight.Text);
-                    nextSimObj = new Obstacle();
+                    int prevW = (selectedObject as Obstacle).Width;
+                    int prevH = (selectedObject as Obstacle).Height;
+
+                    int newW = Int32.Parse(ObstacleWidth.Text);
+                    int newH = Int32.Parse(ObstacleHeight.Text);
+
+                    (selectedObject as Obstacle).Width = newW;
+                    (selectedObject as Obstacle).Height = newH;
+
+                    if(prevW != newW || prevH != newH || AreDifferent(prevPos, selectedObject.Position))
+                    {
+                        changeWasMade = true;
+                    }
+
                     break;
                 case Colony colony:
-                    (selectedObject as Colony).Radius = Int32.Parse(NestRadius.Text);
-                    nextSimObj = new Colony();
+                    int prevR = (selectedObject as Colony).Radius;
+                    int newR = Int32.Parse(NestRadius.Text);
+                    (selectedObject as Colony).Radius = newR;
+
+                    if (prevR != newR || AreDifferent(prevPos, selectedObject.Position))
+                    {
+                        changeWasMade = true;
+                    }
+
                     break;
                 default:
                     return;
             }
-
-            simObjects.Add(selectedObject);
-            selectedObject = nextSimObj;
+            if (!simStaticObjects.Contains(selectedObject) || changeWasMade)
+            {
+                if (changeWasMade)
+                {
+                    simStaticObjects.Remove(prevSelectedObject);
+                    changeWasMade = false;
+                }
+                simStaticObjects.Add(selectedObject);
+                RenderStatics();                
+                //simObjects.Add(selectedObject);
+            }
+            //simObjects.Add(selectedObject);
             RenderAll();
         }
 
+        private bool AreDifferent(Point a, Point b)
+        {
+            if (a.X != b.X) return true;
+            if (a.Y != b.Y) return true;
+            return false;
+        }
 
     }
 }
