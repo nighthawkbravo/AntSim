@@ -44,8 +44,6 @@ namespace WpfAntSimulator.SimObjects
                     else
                         bm.SetPixel(x, y, MyColor);
             }
-
-            Enlarge(bm);
         }
         public void Enlarge(Bitmap bm)
         {
