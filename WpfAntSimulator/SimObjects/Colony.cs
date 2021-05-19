@@ -20,11 +20,6 @@ class Colony : ISimObject
             MyColor = Color.Violet;
         }
 
-
-
-
-
-
         public void Update()
         {
 
@@ -50,6 +45,10 @@ class Colony : ISimObject
             bm.SetPixel(Position.X + 1, Position.Y, MyColor);
             bm.SetPixel(Position.X, Position.Y + 1, MyColor);
             bm.SetPixel(Position.X, Position.Y - 1, MyColor);
+        }
+        public bool ShouldBeRendered()
+        {
+            return true;
         }
     }
 }

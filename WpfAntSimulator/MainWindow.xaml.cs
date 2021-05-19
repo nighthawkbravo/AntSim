@@ -41,12 +41,16 @@ namespace WpfAntSimulator
         }
 
         public static List<Direction> directions = new List<Direction>()
-        { Direction.north, Direction.northeast, Direction.east, Direction.southeast, Direction.south, Direction.southwest, Direction.west, Direction.northwest, Direction.center, Direction.center};
+        { Direction.northwest, Direction.north, Direction.northeast, Direction.east,    // 0, 1, 2, 3
+          Direction.southeast, Direction.south, Direction.southwest,                    // 4, 5, 6
+          Direction.west, Direction.northwest, Direction.north,                         // 7, 8, 9
+          Direction.center, Direction.center                                            // 10, 11
+        };
 
         public static Direction NumToDir(int i)
         {
             return directions[i];
-        }
+        }        
     }      
 
     public partial class MainWindow : Window
@@ -56,8 +60,6 @@ namespace WpfAntSimulator
         private const int height = 814;
 
         private int numOfAnts;
-
-        private List<ISimObject> simObjects;
 
         private Bitmap bm;
 
@@ -69,8 +71,9 @@ namespace WpfAntSimulator
         private bool simInit = false;
 
         private Random rnd;
-        
 
+        private List<ISimObject> toBeRemoved = new List<ISimObject>();
+        private List<ISimObject> simObjects;
         private Point center = new Point(1126 / 2, 814 / 2);
 
 
@@ -89,7 +92,20 @@ namespace WpfAntSimulator
         {
             foreach (var simObj in simObjects)
             {
+                if (!simObj.ShouldBeRendered())
+                {
+                    toBeRemoved.Add(simObj);
+                    continue;
+                }
                 simObj.Update();
+            }
+            if (toBeRemoved.Count > 0)
+            {
+                foreach (var o in toBeRemoved)
+                {
+                    simObjects.Remove(o);
+                }
+                toBeRemoved.Clear();
             }
         }
         private void RenderAll()
@@ -155,7 +171,7 @@ namespace WpfAntSimulator
             UpdateAll();
 
             RenderAll();
-            System.Threading.Thread.Sleep(10);
+            System.Threading.Thread.Sleep(8);
             if (continueCalculating)
             {
                 StartOrStopButton.Dispatcher.BeginInvoke(
