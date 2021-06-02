@@ -52,7 +52,8 @@ namespace WpfAntSimulator
         public static Direction NumToDir(int i)
         {
             return directions[i];
-        }        
+        }
+
     }      
 
     public partial class MainWindow : Window
@@ -65,6 +66,7 @@ namespace WpfAntSimulator
 
         private Bitmap bm;
         private Bitmap bmStatic;
+        private Bitmap mergedBMs;
 
         private string mylightRed = "#FF5555";
         private string mylightGreen = "#42f548";
@@ -93,6 +95,7 @@ namespace WpfAntSimulator
 
             numOfAnts = Int32.Parse(AntAmount.Text);
             bmStatic = new Bitmap(width, height);
+
             RenderAll();
         }
 
@@ -105,7 +108,7 @@ namespace WpfAntSimulator
                     toBeRemoved.Add(simObj);
                     continue;
                 }
-                simObj.Update();
+                simObj.Update(mergedBMs);
             }
             if (toBeRemoved.Count > 0)
             {
@@ -134,8 +137,10 @@ namespace WpfAntSimulator
             {
                 simObj.Render(bm);
             }
-            var res = MergedBitmaps(bmStatic, bm);
-            DisplayImage(res);
+            mergedBMs = MergedBitmaps(bmStatic, bm);
+
+
+            DisplayImage(mergedBMs);
         }
         private void InitSim()
         {
@@ -190,11 +195,12 @@ namespace WpfAntSimulator
                 InitSim();
                 simInit = true;
                 
-            }
+            }           
+
+            RenderAll();
 
             UpdateAll();
 
-            RenderAll();
             System.Threading.Thread.Sleep(8);
             if (continueCalculating)
             {
@@ -298,10 +304,8 @@ namespace WpfAntSimulator
                     changeWasMade = false;
                 }
                 simStaticObjects.Add(selectedObject);
-                RenderStatics();                
-                //simObjects.Add(selectedObject);
+                RenderStatics();
             }
-            //simObjects.Add(selectedObject);
             RenderAll();
         }
 
@@ -323,6 +327,5 @@ namespace WpfAntSimulator
             }
             return result;
         }
-
     }
 }
