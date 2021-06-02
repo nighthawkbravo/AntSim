@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Point = System.Drawing.Point;
 using Color = System.Drawing.Color;
 using Bitmap = System.Drawing.Bitmap;
+using System.Windows;
 
 namespace WpfAntSimulator.SimObjects
 {
@@ -31,7 +32,7 @@ namespace WpfAntSimulator.SimObjects
             MyColor = Color.Brown;
         }
 
-        public void Update()
+        public void Update(Bitmap bm)
         {
             
         }
@@ -42,7 +43,7 @@ namespace WpfAntSimulator.SimObjects
                 for (int y = Convert.ToInt32(Position.Y - (Height / 2)); y < Convert.ToInt32(Position.Y + (Height / 2)); y++)
                     if (IsInBound(x, y, bm))
                         bm.SetPixel(x, y, MyColor);
-            }
+            }            
         }
         public void Enlarge(Bitmap bm)
         {
