@@ -26,6 +26,7 @@ namespace WpfAntSimulator.SimObjects
         private bool hasFood = false;
 
 
+
         public Point Position { get; set; }
         public Color MyColor { get; set; }        
 
