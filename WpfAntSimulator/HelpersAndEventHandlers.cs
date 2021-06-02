@@ -27,6 +27,11 @@ namespace WpfAntSimulator
         {
             simObjects.Clear();
             simStaticObjects.Clear();
+
+            simStaticObjects.Add(OriginalColony = new Colony(new Point(563, 407), 3));
+
+            if (StartOrStopText.Text == "Stop")
+                StartOrStopSimButton(null, null);
             simInit = false;
             RenderStatics();
             RenderAll();
