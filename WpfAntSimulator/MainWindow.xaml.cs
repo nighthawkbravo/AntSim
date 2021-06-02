@@ -112,8 +112,6 @@ namespace WpfAntSimulator
                     continue;
                 }
                 simObj.Update(mergedBMs);
-                if ((simObj as Ant).CheckDirection((simObj as Ant).Position, bm) != null) ;
-
             }
             if (toBeRemoved.Count > 0)
             {
@@ -149,7 +147,7 @@ namespace WpfAntSimulator
         }
         private void InitSim()
         {
-            simStaticObjects.Add(new Colony(center));
+            simObjects.Add(new Colony(center));
             for (int i=0; i<numOfAnts; ++i)
             {
                 // Random rand = new Random(Guid.NewGuid().GetHashCode()); // Very useful for generating random objects with random seeds!
