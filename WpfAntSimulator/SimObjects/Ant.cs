@@ -7,6 +7,8 @@ using Point = System.Drawing.Point;
 using Color = System.Drawing.Color;
 using Bitmap = System.Drawing.Bitmap;
 using Direction = WpfAntSimulator.Globals.Direction;
+using WpfAntSimulator.SimObjects.Pheremone;
+
 using System.Windows;
 
 namespace WpfAntSimulator.SimObjects
@@ -48,8 +50,38 @@ namespace WpfAntSimulator.SimObjects
             return true;
         }
 
+        private void UpdateTrail()
+        {
+            var trail = Globals.GetTrailAt(Position);
+            if (trail == null)
+            {
+                if (!hasFood)
+                {
+                    Globals.TrailObjects.Add(new BlueTrail(Position));
+                }
+                else
+                {
+                    // RedTrail stuff
+                }
+            }
+            else
+            {
+                if (!hasFood)
+                {
+                    ((BlueTrail) trail).AddScent();
+                }
+                else
+                {
+                    // RedTrail stuff
+                }
+            }
+        }
+
         public void Update(Bitmap bm)
         {
+            UpdateTrail();
+
+
             lifeSpan--;
             prevDir = dir;
             switch (dir)
@@ -114,7 +146,7 @@ namespace WpfAntSimulator.SimObjects
 
         private void UpdatePos(int x, int y, Bitmap bm)
         {
-
+            
             if (IsBounds(Position.X + x * multiplyer, Position.Y) && !IsObstacle(Position.X + x * multiplyer, Position.Y, bm))
             {
                 Position = new Point(Position.X + x * multiplyer, Position.Y);
