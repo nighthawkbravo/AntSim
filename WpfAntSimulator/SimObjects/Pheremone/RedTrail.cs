@@ -9,12 +9,15 @@ namespace WpfAntSimulator.SimObjects.Pheremone
 {
     public class RedTrail : ISimObject
     {
-        public Point Position { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public Color MyColor { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public Point Position { get; set; }
+        public Color MyColor { get; set; }
 
         public void Enlarge(Bitmap bm)
         {
-            throw new NotImplementedException();
+            bm.SetPixel(Position.X - 1, Position.Y, MyColor);
+            bm.SetPixel(Position.X + 1, Position.Y, MyColor);
+            bm.SetPixel(Position.X, Position.Y + 1, MyColor);
+            bm.SetPixel(Position.X, Position.Y - 1, MyColor);
         }
 
         public void Render(Bitmap bm)
