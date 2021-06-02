@@ -17,7 +17,16 @@ namespace WpfAntSimulator.SimObjects
         public Point Position { get; set; }
         public Color MyColor { get; set; }
 
-
+        public Food()
+        {
+            MyColor = Color.Green;
+        }
+        public Food(Point point)
+        {
+            Position = point;
+            MyColor = Color.Green;
+            FoodAmount = 1;
+        }
 
         public void Update(Bitmap bm)
         {
@@ -34,7 +43,10 @@ namespace WpfAntSimulator.SimObjects
         }
         public bool ShouldBeRendered()
         {
-            return true;
+            if (FoodAmount > 0)
+                return true;
+            else
+                return false;
         }
     }
 }

@@ -1,29 +1,18 @@
 ﻿
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-
 using System;
-using System.Diagnostics;
-using System.Windows;
-using System.Windows.Threading;
-using Bitmap = System.Drawing.Bitmap;
-using Color = System.Drawing.Color;
-using Point = System.Drawing.Point;
-using System.IO;
-using System.Drawing.Imaging;
-using WpfAntSimulator.SimObjects;
-using System.Text.RegularExpressions;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Text.RegularExpressions;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media.Imaging;
+using System.Windows.Threading;
+using WpfAntSimulator.SimObjects;
+using Bitmap = System.Drawing.Bitmap;
+using Point = System.Drawing.Point;
 
 namespace WpfAntSimulator
 {
@@ -56,8 +45,7 @@ namespace WpfAntSimulator
         {
             return directions[i];
         }
-
-    }      
+    }
 
     public partial class MainWindow : Window
     {
@@ -80,6 +68,7 @@ namespace WpfAntSimulator
 
         private Random rnd;
 
+        private Colony OriginalColony;
         private List<ISimObject> toBeRemoved = new List<ISimObject>();
         private List<ISimObject> simObjects;
         private List<ISimObject> simStaticObjects = new List<ISimObject>();
@@ -99,6 +88,9 @@ namespace WpfAntSimulator
             numOfAnts = Int32.Parse(AntAmount.Text);
             bmStatic = new Bitmap(width, height);
 
+            RenderAll();
+            simStaticObjects.Add(OriginalColony = new Colony(center, 3));
+            RenderStatics();
             RenderAll();
         }
 
@@ -147,12 +139,11 @@ namespace WpfAntSimulator
         }
         private void InitSim()
         {
-            simObjects.Add(new Colony(center));
-            for (int i=0; i<numOfAnts; ++i)
+            for (int i = 0; i < numOfAnts; ++i)
             {
                 // Random rand = new Random(Guid.NewGuid().GetHashCode()); // Very useful for generating random objects with random seeds!
-                simObjects.Add(new Ant(Globals.NumToDir(rnd.Next(Globals.directions.Count)), center, new Random(Guid.NewGuid().GetHashCode())));
-                
+                simObjects.Add(new Ant(Globals.NumToDir(rnd.Next(Globals.directions.Count)), OriginalColony.Position, new Random(Guid.NewGuid().GetHashCode())));
+
             }
         }
         private void StartOrStopSimButton(object sender, RoutedEventArgs e)
@@ -175,19 +166,12 @@ namespace WpfAntSimulator
         private void AntAmountChange(object sender, TextChangedEventArgs e)
         {
             int i;
-            if(Int32.TryParse(AntAmount.Text, out i))
+            if (Int32.TryParse(AntAmount.Text, out i))
             {
                 numOfAnts = i;
             }
         }
-        private void ResetSimButton(object sender, RoutedEventArgs e)
-        {
-            simObjects.Clear();
-            simStaticObjects.Clear();
-            simInit = false;
-            RenderStatics();
-            RenderAll();
-        }
+
 
 
         // This function is the engine.
@@ -279,7 +263,7 @@ namespace WpfAntSimulator
                     (selectedObject as Obstacle).Width = newW;
                     (selectedObject as Obstacle).Height = newH;
 
-                    if(prevW != newW || prevH != newH || AreDifferent(prevPos, selectedObject.Position))
+                    if (prevW != newW || prevH != newH || AreDifferent(prevPos, selectedObject.Position))
                     {
                         changeWasMade = true;
                     }
@@ -290,12 +274,20 @@ namespace WpfAntSimulator
                     int newR = Int32.Parse(NestRadius.Text);
                     (selectedObject as Colony).Radius = newR;
 
+                    simStaticObjects.Remove(OriginalColony);
+                    simStaticObjects.Add(OriginalColony = new Colony(selectedObject.Position, newR));
+
                     if (prevR != newR || AreDifferent(prevPos, selectedObject.Position))
                     {
                         changeWasMade = true;
                     }
 
                     break;
+                case Food food:
+                    CreateFood(selectedObject.Position, Int32.Parse(FoodWidth.Text), Int32.Parse(FoodHeight.Text));
+                    RenderStatics();
+                    RenderAll();
+                    return;
                 default:
                     return;
             }
@@ -311,7 +303,6 @@ namespace WpfAntSimulator
             }
             RenderAll();
         }
-
         private bool AreDifferent(Point a, Point b)
         {
             if (a.X != b.X) return true;
@@ -329,6 +320,42 @@ namespace WpfAntSimulator
                 g.DrawImage(bmp1, Point.Empty);
             }
             return result;
+        }
+
+        private void ResetSimButton(object sender, RoutedEventArgs e)
+        {
+            simObjects.Clear();
+            simStaticObjects.Clear();
+
+            simStaticObjects.Add(OriginalColony = new Colony(new Point(563, 407), 3));
+
+            if (StartOrStopText.Text == "Stop")
+                StartOrStopSimButton(null, null);
+            simInit = false;
+            RenderStatics();
+            RenderAll();
+        }
+        public bool IsInBound(int x, int y, Bitmap bm)
+        {
+            if (x > 0 && x < bm.Width && y > 0 && y < bm.Height)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private void SelectFood_Click(object sender, RoutedEventArgs e)
+        {
+            selectedObject = new Food();
+        }
+
+        private void CreateFood(Point point, int width, int height)
+        {
+
+            for (int x = point.X - (width / 2); x < point.X + (width / 2); x++)
+                for (int y = point.Y - (height / 2); y < point.Y + (height / 2); y++)
+                    if (IsInBound(x, y, bm))
+                        simStaticObjects.Add(new Food(new Point(x, y)));
         }
     }
 }

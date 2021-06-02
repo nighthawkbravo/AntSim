@@ -27,6 +27,13 @@ namespace WpfAntSimulator.SimObjects
             MyColor = Color.Violet;
         }
 
+        public Colony(Point p, int radius)
+        {
+            Position = p;
+            Radius = radius;
+            MyColor = Color.Violet;
+        }
+
         private Bitmap midPointCircleDraw(int x_centre, int y_centre, int r, Bitmap bm)
         {
             int x = r, y = 0;
@@ -63,6 +70,9 @@ namespace WpfAntSimulator.SimObjects
                     ColorPixel(-y + x_centre, -x + y_centre, bm); // Bottom left
                 }
             }
+
+            ColorPixel(x, y - Radius - 1, bm);
+            ColorPixel(x - Radius, y + 1, bm);
             return bm;
         }
         

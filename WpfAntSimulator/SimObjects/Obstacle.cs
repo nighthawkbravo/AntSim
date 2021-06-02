@@ -41,8 +41,7 @@ namespace WpfAntSimulator.SimObjects
             for (int x = Convert.ToInt32(Position.X - (Width / 2)); x < Convert.ToInt32(Position.X + (Width / 2)); x++)
             {
                 for (int y = Convert.ToInt32(Position.Y - (Height / 2)); y < Convert.ToInt32(Position.Y + (Height / 2)); y++)
-                    if (!IsInBound(x, y, bm)) return;
-                    else
+                    if (IsInBound(x, y, bm))
                         bm.SetPixel(x, y, MyColor);
             }            
         }
