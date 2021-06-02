@@ -19,12 +19,12 @@ namespace WpfAntSimulator.SimObjects
 
         public Food()
         {
-            MyColor = Color.Green;
+            MyColor = Globals.foodColor;
         }
         public Food(Point point)
         {
             Position = point;
-            MyColor = Color.Green;
+            MyColor = Globals.foodColor;
             FoodAmount = 1;
         }
 
