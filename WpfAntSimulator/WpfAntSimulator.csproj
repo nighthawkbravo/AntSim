@@ -57,8 +57,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="HelpersAndEventHandlers.cs" />
-    <Compile Include="Rendering.cs" />
     <Compile Include="SimObjects\Ant.cs" />
     <Compile Include="SimObjects\Colony.cs" />
     <Compile Include="SimObjects\Food.cs" />

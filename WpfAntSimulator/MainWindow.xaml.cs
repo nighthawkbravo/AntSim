@@ -260,7 +260,7 @@ namespace WpfAntSimulator
                     (selectedObject as Obstacle).Width = newW;
                     (selectedObject as Obstacle).Height = newH;
 
-                    if(prevW != newW || prevH != newH || AreDifferent(prevPos, selectedObject.Position))
+                    if (prevW != newW || prevH != newH || AreDifferent(prevPos, selectedObject.Position))
                     {
                         changeWasMade = true;
                     }
@@ -271,12 +271,20 @@ namespace WpfAntSimulator
                     int newR = Int32.Parse(NestRadius.Text);
                     (selectedObject as Colony).Radius = newR;
 
+                    simStaticObjects.Remove(OriginalColony);
+                    simStaticObjects.Add(OriginalColony = new Colony(selectedObject.Position, newR));
+
                     if (prevR != newR || AreDifferent(prevPos, selectedObject.Position))
                     {
                         changeWasMade = true;
                     }
 
                     break;
+                case Food food:
+                    CreateFood(selectedObject.Position, Int32.Parse(FoodWidth.Text), Int32.Parse(FoodHeight.Text));
+                    RenderStatics();
+                    RenderAll();
+                    return;
                 default:
                     return;
             }
@@ -292,7 +300,6 @@ namespace WpfAntSimulator
             }
             RenderAll();
         }
-
         private bool AreDifferent(Point a, Point b)
         {
             if (a.X != b.X) return true;
@@ -310,6 +317,42 @@ namespace WpfAntSimulator
                 g.DrawImage(bmp1, Point.Empty);
             }
             return result;
+        }
+
+        private void ResetSimButton(object sender, RoutedEventArgs e)
+        {
+            simObjects.Clear();
+            simStaticObjects.Clear();
+
+            simStaticObjects.Add(OriginalColony = new Colony(new Point(563, 407), 3));
+
+            if (StartOrStopText.Text == "Stop")
+                StartOrStopSimButton(null, null);
+            simInit = false;
+            RenderStatics();
+            RenderAll();
+        }
+        public bool IsInBound(int x, int y, Bitmap bm)
+        {
+            if (x > 0 && x < bm.Width && y > 0 && y < bm.Height)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private void SelectFood_Click(object sender, RoutedEventArgs e)
+        {
+            selectedObject = new Food();
+        }
+
+        private void CreateFood(Point point, int width, int height)
+        {
+
+            for (int x = point.X - (width / 2); x < point.X + (width / 2); x++)
+                for (int y = point.Y - (height / 2); y < point.Y + (height / 2); y++)
+                    if (IsInBound(x, y, bm))
+                        simStaticObjects.Add(new Food(new Point(x, y)));
         }
     }
 }
