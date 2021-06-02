@@ -21,11 +21,11 @@ namespace WpfAntSimulator.SimObjects
         private int multiplyer = 1;
         private int lifeSpan;
 
+        private bool hasFood = false;
+
 
         public Point Position { get; set; }
-        public Color MyColor { get; set; }
-
-        private readonly Color obstacleColor = Color.Brown;
+        public Color MyColor { get; set; }        
 
         private Direction prevDir;
         private Direction dir;
@@ -87,8 +87,6 @@ namespace WpfAntSimulator.SimObjects
         {
             if (rnd.Next(7) < 3) // 0 - 6
             {
-                //return Globals.directions[rnd.Next(Globals.directions.Count)];
-
                 switch (d)
                 {
                     case Direction.west:
@@ -116,13 +114,14 @@ namespace WpfAntSimulator.SimObjects
 
         private void UpdatePos(int x, int y, Bitmap bm)
         {
-            if(Position.X + x*multiplyer >= 0 && Position.X + x * multiplyer < width && !IsObstacle(Position.X + x * multiplyer, Position.Y, bm))
+
+            if (IsBounds(Position.X + x * multiplyer, Position.Y) && !IsObstacle(Position.X + x * multiplyer, Position.Y, bm))
             {
                 Position = new Point(Position.X + x * multiplyer, Position.Y);
             }
-            if (Position.Y + y * multiplyer >= 0 && Position.Y + y * multiplyer < height && !IsObstacle(Position.X, Position.Y + y * multiplyer, bm))
+            if (IsBounds(Position.X , Position.Y + y * multiplyer) && !IsObstacle(Position.X, Position.Y + y * multiplyer, bm))
             {
-                Position = new Point(Position.X , Position.Y+y * multiplyer);
+                Position = new Point(Position.X, Position.Y + y * multiplyer);
             }
         }
 
@@ -143,14 +142,21 @@ namespace WpfAntSimulator.SimObjects
             bm.SetPixel(Position.X, Position.Y - 1, MyColor);
         }
 
-        public bool IsObstacle(int i, int j, Bitmap bm)
+        private bool IsObstacle(int i, int j, Bitmap bm)
         {
+            
             var c = bm.GetPixel(i, j);
-            if (c.A == obstacleColor.A &&
-               c.R == obstacleColor.R &&
-               c.G == obstacleColor.G &&
-               c.B == obstacleColor.B) return true;
+            if (c.A == Globals.obstacleColor.A &&
+               c.R == Globals.obstacleColor.R &&
+               c.G == Globals.obstacleColor.G &&
+               c.B == Globals.obstacleColor.B) return true;
             return false;
+        }
+        private bool IsBounds(int i, int j)
+        {
+            if (!(i >= 0 && i < width)) return false;
+            if (!(j >= 0 && j < height)) return false;
+            return true;
         }
     }
 }
