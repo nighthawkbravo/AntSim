@@ -7,6 +7,7 @@ using Point = System.Drawing.Point;
 using Color = System.Drawing.Color;
 using Bitmap = System.Drawing.Bitmap;
 using Direction = WpfAntSimulator.Globals.Direction;
+using System.Windows;
 
 namespace WpfAntSimulator.SimObjects
 {
@@ -23,6 +24,8 @@ namespace WpfAntSimulator.SimObjects
 
         public Point Position { get; set; }
         public Color MyColor { get; set; }
+
+        private readonly Color obstacleColor = Color.Brown;
 
         private Direction prevDir;
         private Direction dir;
@@ -45,48 +48,48 @@ namespace WpfAntSimulator.SimObjects
             return true;
         }
 
-        public void Update()
+        public void Update(Bitmap bm)
         {
             lifeSpan--;
             prevDir = dir;
             switch (dir)
             {
                 case Direction.west:
-                    UpdatePos(-1, 0);                    
+                    UpdatePos(-1, 0, bm);                    
                     break;
                 case Direction.northwest:
-                    UpdatePos(-1, 1);
+                    UpdatePos(-1, 1, bm);
                     break;
                 case Direction.north:
-                    UpdatePos(0, 1);
+                    UpdatePos(0, 1, bm);
                     break;
                 case Direction.northeast:
-                    UpdatePos(1, 1);
+                    UpdatePos(1, 1, bm);
                     break;
                 case Direction.east:
-                    UpdatePos(1, 0);
+                    UpdatePos(1, 0, bm);
                     break;
                 case Direction.southeast:
-                    UpdatePos(1, -1);
+                    UpdatePos(1, -1, bm);
                     break;
                 case Direction.south:
-                    UpdatePos(0, -1);
+                    UpdatePos(0, -1, bm);
                     break;
                 case Direction.southwest:
-                    UpdatePos(-1, -1);
+                    UpdatePos(-1, -1, bm);
                     break;
                 case Direction.center:
                     break;
             }
             dir = WillIChange(dir);
         }
-        private Direction WillIChange(Direction dir)
+        private Direction WillIChange(Direction d)
         {
             if (rnd.Next(7) < 3) // 0 - 6
             {
                 //return Globals.directions[rnd.Next(Globals.directions.Count)];
 
-                switch (dir)
+                switch (d)
                 {
                     case Direction.west:
                         return Globals.directions[rnd.Next(6,9)]; // 6 - 8
@@ -108,16 +111,16 @@ namespace WpfAntSimulator.SimObjects
                         return Globals.directions[rnd.Next(Globals.directions.Count)];
                 }
             }
-            return dir;
+            return d;
         }
 
-        private void UpdatePos(int x, int y)
+        private void UpdatePos(int x, int y, Bitmap bm)
         {
-            if(Position.X + x*multiplyer >= 0 && Position.X + x * multiplyer < width)
+            if(Position.X + x*multiplyer >= 0 && Position.X + x * multiplyer < width && !IsObstacle(Position.X + x * multiplyer, Position.Y, bm))
             {
                 Position = new Point(Position.X + x * multiplyer, Position.Y);
             }
-            if (Position.Y + y * multiplyer >= 0 && Position.Y + y * multiplyer < height)
+            if (Position.Y + y * multiplyer >= 0 && Position.Y + y * multiplyer < height && !IsObstacle(Position.X, Position.Y + y * multiplyer, bm))
             {
                 Position = new Point(Position.X , Position.Y+y * multiplyer);
             }
@@ -138,6 +141,16 @@ namespace WpfAntSimulator.SimObjects
             bm.SetPixel(Position.X + 1, Position.Y, MyColor);
             bm.SetPixel(Position.X, Position.Y + 1, MyColor);
             bm.SetPixel(Position.X, Position.Y - 1, MyColor);
+        }
+
+        public bool IsObstacle(int i, int j, Bitmap bm)
+        {
+            var c = bm.GetPixel(i, j);
+            if (c.A == obstacleColor.A &&
+               c.R == obstacleColor.R &&
+               c.G == obstacleColor.G &&
+               c.B == obstacleColor.B) return true;
+            return false;
         }
     }
 }
