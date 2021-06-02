@@ -142,10 +142,144 @@ namespace WpfAntSimulator.SimObjects
             bm.SetPixel(Position.X, Position.Y - 1, MyColor);
         }
 
-        private bool IsObstacle(int i, int j, Bitmap bm)
+        public Point? CheckDirection(Point p, Bitmap bm)
+        {
+            int i = p.X;
+            int j = p.Y;
+            switch (dir)
+            {
+                case Direction.west:
+                    if (IsFood(Position.X - 1, Position.Y - 1, bm))
+                        return new Point(Position.X - 1, Position.Y - 1);
+
+                    if (IsFood(Position.X - 1, Position.Y, bm))
+                        return new Point(Position.X - 1, Position.Y);
+
+                    if (IsFood(Position.X - 1, Position.Y + 1, bm))
+                        return new Point(Position.X - 1, Position.Y + 1);
+                    break;
+                case Direction.northwest:
+                    if (IsFood(Position.X - 1, Position.Y, bm))
+                        return new Point(Position.X - 1, Position.Y);
+
+                    if (IsFood(Position.X - 1, Position.Y + 1, bm))
+                        return new Point(Position.X - 1, Position.Y + 1);
+
+                    if (IsFood(Position.X, Position.Y + 1, bm))
+                        return new Point(Position.X, Position.Y + 1);
+                    break;
+                case Direction.north:
+                    if (IsFood(Position.X - 1, Position.Y + 1, bm))
+                        return new Point(Position.X - 1, Position.Y + 1);
+
+                    if (IsFood(Position.X, Position.Y + 1, bm))
+                        return new Point(Position.X, Position.Y + 1);
+
+                    if (IsFood(Position.X + 1, Position.Y + 1, bm))
+                        return new Point(Position.X + 1, Position.Y + 1);
+                    break;
+                case Direction.northeast:
+                    if (IsFood(Position.X, Position.Y + 1, bm))
+                        return new Point(Position.X, Position.Y + 1);
+
+                    if (IsFood(Position.X + 1, Position.Y + 1, bm))
+                        return new Point(Position.X + 1, Position.Y + 1);
+
+                    if (IsFood(Position.X + 1, Position.Y, bm))
+                        return new Point(Position.X + 1, Position.Y);
+                    break;
+                case Direction.east:
+                    if (IsFood(Position.X + 1, Position.Y + 1, bm))
+                        return new Point(Position.X + 1, Position.Y + 1);
+
+                    if (IsFood(Position.X + 1, Position.Y, bm))
+                        return new Point(Position.X + 1, Position.Y);
+
+                    if (IsFood(Position.X + 1, Position.Y - 1, bm))
+                        return new Point(Position.X + 1, Position.Y - 1);
+                    break;
+                case Direction.southeast:
+                    if (IsFood(Position.X + 1, Position.Y, bm))
+                        return new Point(Position.X + 1, Position.Y);
+
+                    if (IsFood(Position.X + 1, Position.Y - 1, bm))
+                        return new Point(Position.X + 1, Position.Y - 1);
+
+                    if (IsFood(Position.X, Position.Y - 1, bm))
+                        return new Point(Position.X, Position.Y - 1);
+                    break;
+                case Direction.south:
+                    if (IsFood(Position.X + 1, Position.Y - 1, bm))
+                        return new Point(Position.X + 1, Position.Y - 1);
+
+                    if (IsFood(Position.X, Position.Y - 1, bm))
+                        return new Point(Position.X, Position.Y - 1);
+
+                    if (IsFood(Position.X - 1, Position.Y - 1, bm))
+                        return new Point(Position.X - 1, Position.Y - 1);
+                    break;
+                case Direction.southwest:
+                    if (IsFood(Position.X, Position.Y - 1, bm))
+                        return new Point(Position.X, Position.Y - 1);
+
+                    if (IsFood(Position.X - 1, Position.Y - 1, bm))
+                        return new Point(Position.X - 1, Position.Y - 1);
+
+                    if (IsFood(Position.X - 1, Position.Y, bm))
+                        return new Point(Position.X - 1, Position.Y);
+                    break;
+                case Direction.center:
+                    if (IsFood(Position.X, Position.Y, bm))
+                        return new Point(Position.X, Position.Y);
+
+                    if (IsFood(Position.X - 1, Position.Y - 1, bm))
+                        return new Point(Position.X - 1, Position.Y - 1);
+
+                    if (IsFood(Position.X - 1, Position.Y, bm))
+                        return new Point(Position.X - 1, Position.Y);
+
+                    if (IsFood(Position.X - 1, Position.Y + 1, bm))
+                        return new Point(Position.X - 1, Position.Y + 1);
+
+                    if (IsFood(Position.X, Position.Y + 1, bm))
+                        return new Point(Position.X, Position.Y + 1);
+
+                    if (IsFood(Position.X + 1, Position.Y + 1, bm))
+                        return new Point(Position.X + 1, Position.Y + 1);
+
+                    if (IsFood(Position.X + 1, Position.Y, bm))
+                        return new Point(Position.X + 1, Position.Y);
+
+                    if (IsFood(Position.X + 1, Position.Y - 1, bm))
+                        return new Point(Position.X + 1, Position.Y - 1);
+
+                    if (IsFood(Position.X, Position.Y - 1, bm))
+                        return new Point(Position.X, Position.Y - 1);
+                    break;
+                default:
+                    return null;
+            }
+            return null;
+        }
+
+        private bool IsFood(int x, int y, Bitmap bm)
+        {
+            var c = bm.GetPixel(x, y);
+            if (c.A == Globals.foodColor.A &&
+               c.R == Globals.foodColor.R &&
+               c.G == Globals.foodColor.G &&
+               c.B == Globals.foodColor.B) return true;
+            return false;
+        }
+        private void GrabFood(Point p, Bitmap bm)
+        {
+
+        }
+
+        private bool IsObstacle(int x, int y, Bitmap bm)
         {
             
-            var c = bm.GetPixel(i, j);
+            var c = bm.GetPixel(x, y);
             if (c.A == Globals.obstacleColor.A &&
                c.R == Globals.obstacleColor.R &&
                c.G == Globals.obstacleColor.G &&
