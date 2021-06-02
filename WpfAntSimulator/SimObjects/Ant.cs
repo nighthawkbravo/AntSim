@@ -34,7 +34,7 @@ namespace WpfAntSimulator.SimObjects
         {
             dir = d;
             Position = start;
-            MyColor = Color.White;
+            MyColor = Globals.antColor;
             rnd = r;
             lifeSpan = r.Next(1,201)*20;
         }
