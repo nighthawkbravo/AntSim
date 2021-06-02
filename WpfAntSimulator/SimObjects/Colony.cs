@@ -66,7 +66,7 @@ namespace WpfAntSimulator.SimObjects
             return bm;
         }
         
-        public void Update()
+        public void Update(Bitmap bm)
         {
 
         }

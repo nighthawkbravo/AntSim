@@ -22,7 +22,7 @@ namespace WpfAntSimulator.SimObjects.Pheremone
             throw new NotImplementedException();
         }
 
-        public void Update()
+        public void Update(Bitmap bm)
         {
             throw new NotImplementedException();
         }

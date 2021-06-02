@@ -19,7 +19,7 @@ namespace WpfAntSimulator.SimObjects
 
 
 
-        public void Update()
+        public void Update(Bitmap bm)
         {
 
         }
