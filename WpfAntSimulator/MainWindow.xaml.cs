@@ -29,6 +29,9 @@ namespace WpfAntSimulator
 {
     public static class Globals
     {
+        public static readonly Color obstacleColor = Color.Brown;
+        public static readonly Color foodColor = Color.Green;
+
         public enum Direction
         {
             north,
