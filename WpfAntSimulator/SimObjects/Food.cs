@@ -39,14 +39,15 @@ namespace WpfAntSimulator.SimObjects
 
         public void Enlarge(Bitmap bm)
         {
-
+            bm.SetPixel(Position.X - 1, Position.Y, MyColor);
+            bm.SetPixel(Position.X + 1, Position.Y, MyColor);
+            bm.SetPixel(Position.X, Position.Y + 1, MyColor);
+            bm.SetPixel(Position.X, Position.Y - 1, MyColor);
         }
         public bool ShouldBeRendered()
         {
-            if (FoodAmount > 0)
-                return true;
-            else
-                return false;
+            if (FoodAmount > 0) return true;
+            return false;
         }
     }
 }
