@@ -20,6 +20,9 @@ namespace WpfAntSimulator
     {
         public static readonly Color obstacleColor = Color.Brown;
         public static readonly Color foodColor = Color.Green;
+        public static readonly Color antColor = Color.White;
+        public static readonly Color blueTrailColor = Color.Blue;
+        public static readonly Color redTrailColor = Color.Red;
 
         public enum Direction
         {
