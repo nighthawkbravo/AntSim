@@ -51,6 +51,7 @@
                         <RowDefinition Height="45"/>
                         <RowDefinition Height="45"/>
                         <RowDefinition Height="45"/>
+                        <RowDefinition Height="45"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="45"/>
                         <RowDefinition Height="5"/>
@@ -59,9 +60,9 @@
                     <Grid Grid.Row="0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="150"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Margin="5" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center">Ants</TextBlock>
+                        <TextBlock Grid.Column="0" Margin="5" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center">Starting Ants</TextBlock>
                         <TextBox Name="AntAmount"  Grid.Column="1" Margin="5" Background="#FFD9D9D9" Text="100"  HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="18" TextChanged="AntAmountChange"/>
                     </Grid>
 
@@ -104,7 +105,7 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Margin="5" FontSize="18" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center">Radius:</TextBlock>
                         <TextBlock Name="NestRadius" Width="80" TextAlignment="Center" HorizontalAlignment="Center"  VerticalAlignment="Center" Grid.Column="1" Margin="5"  Text="{Binding ElementName=slRadius, Path=Value,UpdateSourceTrigger=PropertyChanged}" FontSize="18"/>
-                        <Slider Grid.Column="2" x:Name="slRadius" Value="3" Minimum="1" Maximum="5" TickPlacement="None"  TickFrequency="1" IsSnapToTickEnabled="True" VerticalAlignment="Center"/>
+                        <Slider Grid.Column="2" x:Name="slRadius" Value="5" Minimum="3" Maximum="7" TickPlacement="None"  TickFrequency="1" IsSnapToTickEnabled="True" VerticalAlignment="Center"/>
                     </Grid>
                     
                     <!-- Placing food-->
@@ -127,10 +128,17 @@
                         <TextBox Name="FoodWidth" Grid.Column="1" Margin="5" Background="#FFD9D9D9" Text="50"  HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="18" PreviewTextInput="PreviewTextInput"></TextBox>
                         <TextBlock Grid.Column="2"  Margin="5" FontSize="18" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center">Height:</TextBlock>
                         <TextBox Name="FoodHeight" Grid.Column="3" Margin="5" Background="#FFD9D9D9" Text="50"  HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="18" PreviewTextInput="PreviewTextInput"></TextBox>
-
+                    </Grid>
+                    <Grid Grid.Row="7">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Margin="5" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center">Ant Count:</TextBlock>
+                        <TextBlock Name="AntCount" Grid.Column="1" Margin="5" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" Text="100"/>
                     </Grid>
 
-                    <Grid Grid.Row="8">
+                    <Grid Grid.Row="9">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>

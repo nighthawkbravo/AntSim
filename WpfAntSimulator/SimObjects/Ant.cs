@@ -22,8 +22,15 @@ namespace WpfAntSimulator.SimObjects
         private Random rnd;
         private int multiplyer = 1;
         private int lifeSpan;
+        private int lik1 = 1;
+        private int lik2 = 3;
+
 
         private bool hasFood = false;
+
+
+
+        private List<Tuple<Point, Direction>> vision;
 
 
 
@@ -32,14 +39,17 @@ namespace WpfAntSimulator.SimObjects
 
         private Direction prevDir;
         private Direction dir;
+        private Direction tmpDir;
 
         public Ant(Direction d, Point start, Random r)
         {
+            vision = new List<Tuple<Point, Direction>>(3);
             dir = d;
             Position = start;
             MyColor = Globals.antColor;
             rnd = r;
-            lifeSpan = r.Next(1,201)*20;
+            lifeSpan = r.Next(1, 201)*20;
+            prevDir = dir;
         }
 
         public bool ShouldBeRendered()
@@ -51,74 +61,226 @@ namespace WpfAntSimulator.SimObjects
             return true;
         }
 
-        private void UpdateTrail()
+        
+
+        public void Update(Bitmap bm)
         {
-            var trail = Globals.GetTrailAt(Position);
-            if (trail == null)
+            lifeSpan--;
+            if (lifeSpan <= 0) return;
+
+            UpdateTrail(); // 1.) update trail at current position
+
+            GetVisionPoints(); // 2.) Get up to 3 points in view of the ant.
+
+
+            if(IsFoodPixel(Position, bm) && hasFood == false)
             {
-                if (!hasFood)
+                var food = Globals.GetFoodAt(Position);
+                ((Food) food).FoodAmount--;
+                hasFood = true;
+                dir = Globals.FlipDirection(dir);
+                GetVisionPoints();
+            }
+            
+            if (!hasFood)
+            {
+                // if there is RedTrail in my view, then I go there
+                tmpDir = IsRedTrailInFront();
+                if (tmpDir != Direction.center)
                 {
-                    Globals.TrailObjects.Add(new BlueTrail(Position));
+                    dir = tmpDir;
                 }
-                else
+
+                // if there is food in my view & I don't have food, then I go there
+                tmpDir = IsFoodInFront(bm);
+                if (tmpDir != Direction.center)
                 {
-                    // RedTrail stuff
+                    dir = tmpDir;
                 }
             }
             else
             {
-                if (!hasFood)
+                // if there is RedTrail in my view, then I go there
+                tmpDir = IsRedTrailInFront();
+                if (tmpDir != Direction.center)
                 {
-                    ((BlueTrail) trail).AddScent();
+                    dir = tmpDir;
                 }
-                else
+
+                // if there is BlueTrail in my view, then I go there
+                tmpDir = IsBlueTrailInFront();
+                if (tmpDir != Direction.center)
                 {
-                    // RedTrail stuff
+                    dir = tmpDir;
+                }
+
+                // Head towards nest
+
+
+
+
+
+                // Drops off food and creates an ant
+                if (Globals.IsInColony(Position))
+                {
+                    hasFood = false;
+                    dir = Globals.FlipDirection(dir);
+                    Globals.toBeAdded.Add(new Ant(Globals.NumToDir(rnd.Next(Globals.directions.Count)), Globals.OriginalColony.Position, new Random(Guid.NewGuid().GetHashCode())));
                 }
             }
+
+            Movement(bm);
+
+            // Random movement - Exploration mode
+            
+            prevDir = dir;
+            dir = WillIChange(dir);
+            
         }
 
-        public void Update(Bitmap bm)
+        private void GetVisionPoints()
         {
-            UpdateTrail();
-
-
-            lifeSpan--;
-            prevDir = dir;
+            vision.Clear();
             switch (dir)
             {
                 case Direction.west:
-                    UpdatePos(-1, 0, bm);                    
+                    if (IsBounds(Position.X - 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y - 1), Direction.southwest));
+                    if (IsBounds(Position.X - 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y), Direction.west));
+                    if (IsBounds(Position.X - 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y + 1), Direction.northwest));
                     break;
                 case Direction.northwest:
-                    UpdatePos(-1, 1, bm);
+                    if (IsBounds(Position.X - 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y), Direction.west));
+                    if (IsBounds(Position.X - 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y + 1), Direction.northwest));
+                    if (IsBounds(Position.X, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y + 1), Direction.north));
                     break;
                 case Direction.north:
-                    UpdatePos(0, 1, bm);
+                    if (IsBounds(Position.X - 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y + 1), Direction.northwest));
+                    if (IsBounds(Position.X, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y + 1), Direction.north));
+                    if (IsBounds(Position.X + 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y + 1), Direction.northeast));
                     break;
                 case Direction.northeast:
-                    UpdatePos(1, 1, bm);
+                    if (IsBounds(Position.X, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y + 1), Direction.north));
+                    if (IsBounds(Position.X + 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y + 1), Direction.northeast));
+                    if (IsBounds(Position.X + 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y), Direction.east));
                     break;
                 case Direction.east:
-                    UpdatePos(1, 0, bm);
+                    if (IsBounds(Position.X + 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y + 1), Direction.northeast));
+                    if (IsBounds(Position.X + 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y), Direction.east));
+                    if (IsBounds(Position.X + 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y - 1), Direction.southeast));
                     break;
                 case Direction.southeast:
-                    UpdatePos(1, -1, bm);
+                    if (IsBounds(Position.X + 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y), Direction.east));
+                    if (IsBounds(Position.X + 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y - 1), Direction.southeast));
+                    if (IsBounds(Position.X, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y - 1), Direction.south));
                     break;
                 case Direction.south:
-                    UpdatePos(0, -1, bm);
+                    if (IsBounds(Position.X + 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y - 1), Direction.southeast));
+                    if (IsBounds(Position.X, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y - 1), Direction.south));
+                    if (IsBounds(Position.X - 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y - 1), Direction.southwest));
                     break;
                 case Direction.southwest:
-                    UpdatePos(-1, -1, bm);
+                    if (IsBounds(Position.X, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y - 1), Direction.south));
+                    if (IsBounds(Position.X - 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y - 1), Direction.southwest));
+                    if (IsBounds(Position.X - 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y), Direction.west));
                     break;
                 case Direction.center:
+                    switch (prevDir)
+                    {
+                        case Direction.west:
+                            if (IsBounds(Position.X - 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y - 1), Direction.southwest));
+                            if (IsBounds(Position.X - 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y), Direction.west));
+                            if (IsBounds(Position.X - 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y + 1), Direction.northwest));
+                            break;
+                        case Direction.northwest:
+                            if (IsBounds(Position.X - 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y), Direction.west));
+                            if (IsBounds(Position.X - 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y + 1), Direction.northwest));
+                            if (IsBounds(Position.X, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y + 1), Direction.north));
+                            break;
+                        case Direction.north:
+                            if (IsBounds(Position.X - 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y + 1), Direction.northwest));
+                            if (IsBounds(Position.X, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y + 1), Direction.north));
+                            if (IsBounds(Position.X + 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y + 1), Direction.northeast));
+                            break;
+                        case Direction.northeast:
+                            if (IsBounds(Position.X, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y + 1), Direction.north));
+                            if (IsBounds(Position.X + 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y + 1), Direction.northeast));
+                            if (IsBounds(Position.X + 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y), Direction.east));
+                            break;
+                        case Direction.east:
+                            if (IsBounds(Position.X + 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y + 1), Direction.northeast));
+                            if (IsBounds(Position.X + 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y), Direction.east));
+                            if (IsBounds(Position.X + 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y - 1), Direction.southeast));
+                            break;
+                        case Direction.southeast:
+                            if (IsBounds(Position.X + 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y), Direction.east));
+                            if (IsBounds(Position.X + 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y - 1), Direction.southeast));
+                            if (IsBounds(Position.X, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y - 1), Direction.south));
+                            break;
+                        case Direction.south:
+                            if (IsBounds(Position.X + 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y - 1), Direction.southeast));
+                            if (IsBounds(Position.X, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y - 1), Direction.south));
+                            if (IsBounds(Position.X - 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y - 1), Direction.southwest));
+                            break;
+                        case Direction.southwest:
+                            if (IsBounds(Position.X, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y - 1), Direction.south));
+                            if (IsBounds(Position.X - 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y - 1), Direction.southwest));
+                            if (IsBounds(Position.X - 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y), Direction.west));
+                            break;
+                        case Direction.center: // Default to east if the center direction occurs twice.
+                            if (IsBounds(Position.X + 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y + 1), Direction.northeast));
+                            if (IsBounds(Position.X + 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y), Direction.east));
+                            if (IsBounds(Position.X + 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y - 1), Direction.southeast));
+                            break;
+                    }
                     break;
             }
-            dir = WillIChange(dir);
         }
+
+        private Direction IsFoodInFront(Bitmap bm)
+        {
+            foreach(var p in vision)
+            {
+                if (IsFoodPixel(p.Item1, bm)) return p.Item2;
+            }
+            return Direction.center;
+        }
+
+        private Direction IsRedTrailInFront()
+        {
+            int max = 0;
+
+            Direction tmp = Direction.center;
+
+            foreach (var p in vision)
+            {
+                var t = Globals.GetRedTrailAt(p.Item1);
+                if (t != null && ((RedTrail)t).ScentValue >= max) tmp = p.Item2;                
+            }
+            return tmp;
+        }
+
+        private Direction IsBlueTrailInFront()
+        {
+            int max = 0;
+
+            Direction tmp = Direction.center;
+
+            foreach (var p in vision)
+            {
+                var t = Globals.GetBlueTrailAt(p.Item1);
+                if (t != null && ((BlueTrail)t).ScentValue >= max) tmp = p.Item2;
+            }
+            return tmp;
+        }
+
+
         private Direction WillIChange(Direction d)
         {
-            if (rnd.Next(7) < 3) // 0 - 6
+            int r;
+            if(hasFood) r = lik1;
+            else r = lik2;
+
+            if (rnd.Next(7) < r) // 0 - 6
             {
                 switch (d)
                 {
@@ -144,10 +306,77 @@ namespace WpfAntSimulator.SimObjects
             }
             return d;
         }
+        private void UpdateTrail()
+        {
+            ISimObject trail;
+            if (!hasFood)
+            {
+                trail = Globals.GetBlueTrailAt(Position);
+            }
+            else
+            {
+                trail = Globals.GetRedTrailAt(Position);
+            }
 
+            if (trail == null)
+            {
+                if (!hasFood)
+                {
+                    Globals.BlueTrailObjects.Add(new BlueTrail(Position));
+                }
+                else
+                {
+                    // RedTrail stuff
+                    Globals.RedTrailObjects.Add(new RedTrail(Position));
+                }
+            }
+            else
+            {
+                if (!hasFood)
+                {
+                    ((BlueTrail)trail).AddScent();
+                }
+                else
+                {
+                    // RedTrail stuff
+                    ((RedTrail)trail).AddScent();
+                }
+            }
+        }
+        private void Movement(Bitmap bm)
+        {   
+            switch (dir)
+            {
+                case Direction.west:
+                    UpdatePos(-1, 0, bm);
+                    break;
+                case Direction.northwest:
+                    UpdatePos(-1, 1, bm);
+                    break;
+                case Direction.north:
+                    UpdatePos(0, 1, bm);
+                    break;
+                case Direction.northeast:
+                    UpdatePos(1, 1, bm);
+                    break;
+                case Direction.east:
+                    UpdatePos(1, 0, bm);
+                    break;
+                case Direction.southeast:
+                    UpdatePos(1, -1, bm);
+                    break;
+                case Direction.south:
+                    UpdatePos(0, -1, bm);
+                    break;
+                case Direction.southwest:
+                    UpdatePos(-1, -1, bm);
+                    break;
+                case Direction.center:
+                    break;
+            }
+        }
         private void UpdatePos(int x, int y, Bitmap bm)
         {
-            
             if (IsBounds(Position.X + x * multiplyer, Position.Y) && !IsObstacle(Position.X + x * multiplyer, Position.Y, bm))
             {
                 Position = new Point(Position.X + x * multiplyer, Position.Y);
@@ -158,33 +387,49 @@ namespace WpfAntSimulator.SimObjects
             }
         }
 
+
+
         public void Render(Bitmap bm)
         {
-            if (lifeSpan == 0)
-            {
-                return;
-            }
+            if (lifeSpan <= 0) return;
             bm.SetPixel(Position.X, Position.Y, MyColor);
-            //Enlarge(bm);
+            Enlarge(bm);
         }
         public void Enlarge(Bitmap bm)
         {
-            bm.SetPixel(Position.X - 1, Position.Y, MyColor);
-            bm.SetPixel(Position.X + 1, Position.Y, MyColor);
-            bm.SetPixel(Position.X, Position.Y + 1, MyColor);
-            bm.SetPixel(Position.X, Position.Y - 1, MyColor);
+            Globals.ColorPixel(Position.X - 1, Position.Y, MyColor, bm);
+            Globals.ColorPixel(Position.X + 1, Position.Y, MyColor, bm);
+            Globals.ColorPixel(Position.X, Position.Y + 1, MyColor, bm);
+            Globals.ColorPixel(Position.X, Position.Y - 1, MyColor, bm);
         }
 
         private bool IsObstacle(int i, int j, Bitmap bm)
         {
-            
             var c = bm.GetPixel(i, j);
-            if (c.A == Globals.obstacleColor.A &&
-               c.R == Globals.obstacleColor.R &&
-               c.G == Globals.obstacleColor.G &&
-               c.B == Globals.obstacleColor.B) return true;
+            if (c.ToArgb() == Globals.obstacleColor.ToArgb()) return true;
             return false;
         }
+        private bool IsObstacle(Point p, Bitmap bm)
+        {
+            var c = bm.GetPixel(p.X, p.Y);
+            if (c.ToArgb() == Globals.obstacleColor.ToArgb()) return true;
+            return false;
+        }
+        private bool IsFoodPixel(int i, int j, Bitmap bm)
+        {
+            var c = bm.GetPixel(i, j);
+            if (c.ToArgb() == Globals.foodColor.ToArgb()) return true;
+            return false;
+        }
+        private bool IsFoodPixel(Point p, Bitmap bm)
+        {
+            //var c = bm.GetPixel(p.X, p.Y);
+            //if (c.ToArgb() == Globals.foodColor.ToArgb()) return true;
+            //return false;
+
+            return Globals.IsFoodAt(p);
+        }
+
         private bool IsBounds(int i, int j)
         {
             if (!(i >= 0 && i < width)) return false;

@@ -28,7 +28,14 @@ namespace WpfAntSimulator
         public static readonly Color redTrailColor = Color.Red;
         
         public static List<ISimObject> simObjects;
-        public static List<ISimObject> TrailObjects;
+        public static List<ISimObject> simStaticObjects;
+        public static List<ISimObject> simFoodObjects;
+        public static List<ISimObject> BlueTrailObjects;
+        public static List<ISimObject> RedTrailObjects;
+
+        public static List<ISimObject> toBeAdded;
+
+        public static ISimObject OriginalColony;
 
         public enum Direction
         {
@@ -54,14 +61,62 @@ namespace WpfAntSimulator
         {
             return directions[i];
         }
-
-        public static ISimObject GetTrailAt(Point p)
+        public static Direction FlipDirection(Direction dir)
         {
-            foreach(var t in TrailObjects)
+            switch (dir)
+            {
+                case Direction.west:
+                    return Direction.east;
+                case Direction.northwest:
+                    return Direction.southeast;
+                case Direction.north:
+                    return Direction.south;
+                case Direction.northeast:
+                    return Direction.southwest;
+                case Direction.east:
+                    return Direction.west;
+                case Direction.southeast:
+                    return Direction.northwest;
+                case Direction.south:
+                    return Direction.north;
+                case Direction.southwest:
+                    return Direction.northeast;
+            }
+            return Direction.center;
+        }
+
+        public static ISimObject GetBlueTrailAt(Point p)
+        {
+            foreach(var t in BlueTrailObjects)
             {
                 if (t.Position.X == p.X && t.Position.Y == p.Y) return t;
             }
             return null;
+        }
+        public static ISimObject GetRedTrailAt(Point p)
+        {
+            foreach (var t in RedTrailObjects)
+            {
+                if (t.Position.X == p.X && t.Position.Y == p.Y) return t;
+            }
+            return null;
+        }
+        public static ISimObject GetFoodAt(Point p)
+        {
+            foreach (var obj in simFoodObjects)
+            {
+                if (obj.Position.X == p.X && obj.Position.Y == p.Y) return obj;
+            }
+            return null;
+        }
+
+        public static bool IsFoodAt(Point p)
+        {
+            foreach (var obj in simFoodObjects)
+            {
+                if (obj.Position.X == p.X && obj.Position.Y == p.Y) return true;
+            }
+            return false;
         }
 
         public static void ColorPixel(int i, int j, Color c, Bitmap bm)
@@ -70,6 +125,11 @@ namespace WpfAntSimulator
             {
                 bm.SetPixel(i, j, c);
             }
+        }
+
+        public static bool IsInColony(Point p)
+        {
+            return ((Colony)OriginalColony).IsInCircle(p);
         }
     }
 
@@ -94,10 +154,8 @@ namespace WpfAntSimulator
 
         private Random rnd;
 
-        private Colony OriginalColony;
+        //private Colony OriginalColony;
         private List<ISimObject> toBeRemoved = new List<ISimObject>();
-        //private List<ISimObject> simObjects;
-        private List<ISimObject> simStaticObjects = new List<ISimObject>();
         private Point center = new Point(1126 / 2, 814 / 2);
 
         private static readonly Regex _regex = new Regex("[^0-9]+"); //regex that matches disallowed text
@@ -109,14 +167,19 @@ namespace WpfAntSimulator
         {
             InitializeComponent();
             Globals.simObjects = new List<ISimObject>();
-            Globals.TrailObjects = new List<ISimObject>();
+            Globals.simStaticObjects = new List<ISimObject>();
+            Globals.BlueTrailObjects = new List<ISimObject>();
+            Globals.RedTrailObjects = new List<ISimObject>();
+            Globals.simFoodObjects = new List<ISimObject>();
+            Globals.toBeAdded = new List<ISimObject>();
+
             rnd = new Random(Guid.NewGuid().GetHashCode());
 
-            numOfAnts = Int32.Parse(AntAmount.Text);
+            numOfAnts = int.Parse(AntAmount.Text);
             bmStatic = new Bitmap(width, height);
 
             RenderAll();
-            simStaticObjects.Add(OriginalColony = new Colony(center, 3));
+            Globals.simStaticObjects.Add(Globals.OriginalColony = new Colony(center, 5));
             RenderStatics();
             RenderAll();
         }
@@ -124,7 +187,7 @@ namespace WpfAntSimulator
         private void UpdateAll()
         {
             // Update trails and add those that need to be removed to a "trash" list
-            foreach (var trail in Globals.TrailObjects)
+            foreach (var trail in Globals.BlueTrailObjects)
             {
                 if (!trail.ShouldBeRendered())
                 {
@@ -133,14 +196,60 @@ namespace WpfAntSimulator
                 }
                 trail.Update(mergedBMs);
             }
-            if (toBeRemoved.Count > 0)
+            foreach (var o in toBeRemoved)
             {
-                foreach (var o in toBeRemoved)
-                {
-                    Globals.TrailObjects.Remove(o);
-                }
-                toBeRemoved.Clear();
+                Globals.BlueTrailObjects.Remove(o);
             }
+            toBeRemoved.Clear();
+
+            // Update trails and add those that need to be removed to a "trash" list
+            foreach (var trail in Globals.RedTrailObjects)
+            {
+                if (!trail.ShouldBeRendered())
+                {
+                    toBeRemoved.Add(trail);
+                    continue;
+                }
+                trail.Update(mergedBMs);
+            }
+            foreach (var o in toBeRemoved)
+            {
+                Globals.RedTrailObjects.Remove(o);
+            }
+            toBeRemoved.Clear();
+
+            // Update food and add those that need to be removed to a "trash" list
+            foreach (var f in Globals.simFoodObjects)
+            {
+                if (!f.ShouldBeRendered())
+                {
+                    toBeRemoved.Add(f);
+                    continue;
+                }
+                f.Update(mergedBMs);
+            }
+            foreach (var o in toBeRemoved)
+            {
+                Globals.simFoodObjects.Remove(o);
+            }
+            toBeRemoved.Clear();
+
+
+            // Update food/obstacles and add those that need to be removed to a "trash" list
+            foreach (var fORobs in Globals.simStaticObjects)
+            {
+                if (!fORobs.ShouldBeRendered())
+                {
+                    toBeRemoved.Add(fORobs);
+                    continue;
+                }
+                fORobs.Update(mergedBMs);
+            }
+            foreach (var o in toBeRemoved)
+            {
+                Globals.simStaticObjects.Remove(o);
+            }
+            toBeRemoved.Clear();
 
 
             // Update simObjs and add those that need to be removed to a "trash" list
@@ -153,20 +262,24 @@ namespace WpfAntSimulator
                 }
                 simObj.Update(mergedBMs);
             }
-            if (toBeRemoved.Count > 0)
+            foreach (var o in toBeRemoved)
             {
-                foreach (var o in toBeRemoved)
-                {
-                    Globals.simObjects.Remove(o);
-                }
-                toBeRemoved.Clear();
+                Globals.simObjects.Remove(o);
             }
+            toBeRemoved.Clear();
+
+            foreach (var o in Globals.toBeAdded)
+            {
+                Globals.simObjects.Add(o);
+            }
+            Globals.toBeAdded.Clear();
+            AntCount.Text = $"{Globals.simObjects.Count}";
         }
         private void RenderStatics()
         {
             bmStatic = new Bitmap(width, height);
 
-            foreach (var simObj in simStaticObjects)
+            foreach (var simObj in Globals.simStaticObjects)
             {
                 simObj.Render(bmStatic);
             }
@@ -176,14 +289,24 @@ namespace WpfAntSimulator
         {
             bm = new Bitmap(width, height);
             //bm = bmStatic;
-            foreach (var trail in Globals.TrailObjects)
+            foreach (var trail in Globals.BlueTrailObjects)
             {
                 trail.Render(bm);
+            }
+            foreach (var trail in Globals.RedTrailObjects)
+            {
+                trail.Render(bm);
+            }
+            foreach (var food in Globals.simFoodObjects)
+            {
+                food.Render(bm);
             }
             foreach (var simObj in Globals.simObjects)
             {
                 simObj.Render(bm);
             }
+
+            
             mergedBMs = MergedBitmaps(bmStatic, bm);
 
             DisplayImage(mergedBMs);
@@ -193,8 +316,7 @@ namespace WpfAntSimulator
             for (int i = 0; i < numOfAnts; ++i)
             {
                 // Random rand = new Random(Guid.NewGuid().GetHashCode()); // Very useful for generating random objects with random seeds!
-                Globals.simObjects.Add(new Ant(Globals.NumToDir(rnd.Next(Globals.directions.Count)), OriginalColony.Position, new Random(Guid.NewGuid().GetHashCode())));
-
+                Globals.simObjects.Add(new Ant(Globals.NumToDir(rnd.Next(Globals.directions.Count)), Globals.OriginalColony.Position, new Random(Guid.NewGuid().GetHashCode())));
             }
         }
         private void StartOrStopSimButton(object sender, RoutedEventArgs e)
@@ -237,9 +359,9 @@ namespace WpfAntSimulator
 
             RenderAll();
 
-            UpdateAll();
+            UpdateAll();            
 
-            System.Threading.Thread.Sleep(4);
+            System.Threading.Thread.Sleep(10);
             if (continueCalculating)
             {
                 StartOrStopButton.Dispatcher.BeginInvoke(
@@ -322,8 +444,8 @@ namespace WpfAntSimulator
                     int newR = Int32.Parse(NestRadius.Text);
                     (selectedObject as Colony).Radius = newR;
 
-                    simStaticObjects.Remove(OriginalColony);
-                    simStaticObjects.Add(OriginalColony = new Colony(selectedObject.Position, newR));
+                    Globals.simStaticObjects.Remove(Globals.OriginalColony);
+                    Globals.simStaticObjects.Add(Globals.OriginalColony = new Colony(selectedObject.Position, newR));
 
                     if (prevR != newR || AreDifferent(prevPos, selectedObject.Position))
                     {
@@ -339,14 +461,14 @@ namespace WpfAntSimulator
                 default:
                     return;
             }
-            if (!simStaticObjects.Contains(selectedObject) || changeWasMade)
+            if (!Globals.simStaticObjects.Contains(selectedObject) || changeWasMade)
             {
                 if (changeWasMade)
                 {
-                    simStaticObjects.Remove(prevSelectedObject);
+                    Globals.simStaticObjects.Remove(prevSelectedObject);
                     changeWasMade = false;
                 }
-                simStaticObjects.Add(selectedObject);
+                Globals.simStaticObjects.Add(selectedObject);
                 RenderStatics();
             }
             RenderAll();
@@ -371,10 +493,12 @@ namespace WpfAntSimulator
         private void ResetSimButton(object sender, RoutedEventArgs e)
         {
             Globals.simObjects.Clear();
-            Globals.TrailObjects.Clear();
-            simStaticObjects.Clear();
+            Globals.RedTrailObjects.Clear();
+            Globals.BlueTrailObjects.Clear();
+            Globals.simStaticObjects.Clear();
+            Globals.simFoodObjects.Clear();
 
-            simStaticObjects.Add(OriginalColony = new Colony(new Point(563, 407), 3));
+            Globals.simStaticObjects.Add(Globals.OriginalColony = new Colony(new Point(563, 407), Int32.Parse(NestRadius.Text)));
 
             if (StartOrStopText.Text == "Stop")
                 StartOrStopSimButton(null, null);
@@ -397,11 +521,11 @@ namespace WpfAntSimulator
         }
         private void CreateFood(Point point, int width, int height)
         {
-
             for (int x = point.X - (width / 2); x < point.X + (width / 2); x++)
                 for (int y = point.Y - (height / 2); y < point.Y + (height / 2); y++)
                     if (IsInBound(x, y, bm))
-                        simStaticObjects.Add(new Food(new Point(x, y)));
+                        Globals.simFoodObjects.Add(new Food(new Point(x, y)));
         }
+
     }
 }
