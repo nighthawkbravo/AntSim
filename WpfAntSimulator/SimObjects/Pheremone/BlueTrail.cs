@@ -20,7 +20,7 @@ namespace WpfAntSimulator.SimObjects.Pheremone
             Position = new Point(p.X, p.Y);
             MyColor = Globals.blueTrailColor;
             originalColor = Globals.blueTrailColor;
-            initialScentValue = 70;
+            initialScentValue = 200;
             ScentValue = initialScentValue;
         }
 
@@ -53,7 +53,7 @@ namespace WpfAntSimulator.SimObjects.Pheremone
 
         public void AddScent()
         {
-            ScentValue += 10;
+            ScentValue += 200;
         }
 
         private double Clamp(double i)
