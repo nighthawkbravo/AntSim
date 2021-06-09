@@ -26,7 +26,10 @@ namespace WpfAntSimulator
         public static readonly Color antColor = Color.White;
         public static readonly Color blueTrailColor = Color.Blue;
         public static readonly Color redTrailColor = Color.Red;
-        
+
+        public static bool CleanRoadsFlag = true;
+        public static bool BlueTrailsFlag = true;        
+
         public static List<ISimObject> simObjects;
         public static List<ISimObject> simStaticObjects;
         public static List<ISimObject> simFoodObjects;
@@ -110,6 +113,20 @@ namespace WpfAntSimulator
             return null;
         }
 
+        public static Direction GetColonyDirection(Point p)
+        {
+            if (IsInColony(p)) return Direction.center;
+            if (p.Y < OriginalColony.Position.Y && p.X == OriginalColony.Position.X) return Direction.north;
+            if (p.Y < OriginalColony.Position.Y && p.X < OriginalColony.Position.X) return Direction.northeast;
+            if (p.Y == OriginalColony.Position.Y && p.X < OriginalColony.Position.X) return Direction.east;
+            if (p.Y > OriginalColony.Position.Y && p.X < OriginalColony.Position.X) return Direction.southeast;
+            if (p.Y > OriginalColony.Position.Y && p.X == OriginalColony.Position.X) return Direction.south;
+            if (p.Y > OriginalColony.Position.Y && p.X > OriginalColony.Position.X) return Direction.southwest;
+            if (p.Y == OriginalColony.Position.Y && p.X > OriginalColony.Position.X) return Direction.west;
+            //if (p.Y < OriginalColony.Position.Y && p.X > OriginalColony.Position.X) return Direction.northwest;
+            return Direction.northwest;
+        }
+
         public static bool IsFoodAt(Point p)
         {
             foreach (var obj in simFoodObjects)
@@ -162,6 +179,10 @@ namespace WpfAntSimulator
 
         private ISimObject selectedObject;
 
+        private int tick = 0;
+
+        private System.Windows.Media.BrushConverter bc = new System.Windows.Media.BrushConverter();
+
 
         public MainWindow()
         {
@@ -182,6 +203,9 @@ namespace WpfAntSimulator
             Globals.simStaticObjects.Add(Globals.OriginalColony = new Colony(center, 5));
             RenderStatics();
             RenderAll();
+
+            CleanButton.Background = (System.Windows.Media.Brush)bc.ConvertFrom(mylightGreen);
+            BTrailsButton.Background = (System.Windows.Media.Brush)bc.ConvertFrom(mylightGreen);
         }
 
         private void UpdateAll()
@@ -265,12 +289,14 @@ namespace WpfAntSimulator
             foreach (var o in toBeRemoved)
             {
                 Globals.simObjects.Remove(o);
+                AntsDied.Text = (int.Parse(AntsDied.Text) + 1).ToString();
             }
             toBeRemoved.Clear();
 
             foreach (var o in Globals.toBeAdded)
             {
                 Globals.simObjects.Add(o);
+                AntsAdded.Text = (int.Parse(AntsAdded.Text)+1).ToString();
             }
             Globals.toBeAdded.Clear();
             AntCount.Text = $"{Globals.simObjects.Count}";
@@ -342,6 +368,11 @@ namespace WpfAntSimulator
             if (Int32.TryParse(AntAmount.Text, out i))
             {
                 numOfAnts = i;
+
+                if (AntCount != null)
+                {
+                    AntCount.Text = AntAmount.Text;
+                }
             }
         }
 
@@ -353,14 +384,17 @@ namespace WpfAntSimulator
             if (!simInit)
             {
                 InitSim();
-                simInit = true;
-                
+                simInit = true;                
             }           
+
 
             RenderAll();
 
-            UpdateAll();            
+            UpdateAll();
 
+
+            tick++;
+            ticker.Text = tick.ToString();
             System.Threading.Thread.Sleep(10);
             if (continueCalculating)
             {
@@ -504,8 +538,40 @@ namespace WpfAntSimulator
                 StartOrStopSimButton(null, null);
             simInit = false;
             StartOrStopText.Text = "Start";
+            AntCount.Text = AntAmount.Text;
+            AntsDied.Text = "0";
+            AntsAdded.Text = "0";
+            tick = 0;
+            ticker.Text = tick.ToString();
             RenderStatics();
             RenderAll();
+        }
+
+        private void CleanRoadsButton(object sender, RoutedEventArgs e)
+        {
+            if (Globals.CleanRoadsFlag)
+            {
+                Globals.CleanRoadsFlag = false;
+                CleanButton.Background = (System.Windows.Media.Brush)bc.ConvertFrom(mylightRed);
+            }
+            else
+            {
+                Globals.CleanRoadsFlag = true;
+                CleanButton.Background = (System.Windows.Media.Brush)bc.ConvertFrom(mylightGreen);
+            }
+        }
+        private void BTButton(object sender, RoutedEventArgs e)
+        {
+            if (Globals.BlueTrailsFlag)
+            {
+                Globals.BlueTrailsFlag = false;
+                BTrailsButton.Background = (System.Windows.Media.Brush)bc.ConvertFrom(mylightRed);
+            }
+            else
+            {
+                Globals.BlueTrailsFlag = true;                
+                BTrailsButton.Background = (System.Windows.Media.Brush)bc.ConvertFrom(mylightGreen);
+            }
         }
         public bool IsInBound(int x, int y, Bitmap bm)
         {
@@ -526,6 +592,5 @@ namespace WpfAntSimulator
                     if (IsInBound(x, y, bm))
                         Globals.simFoodObjects.Add(new Food(new Point(x, y)));
         }
-
     }
 }
