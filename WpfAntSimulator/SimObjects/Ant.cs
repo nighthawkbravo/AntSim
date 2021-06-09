@@ -27,9 +27,7 @@ namespace WpfAntSimulator.SimObjects
 
 
         private bool hasFood = false;
-
-
-
+        
         private List<Tuple<Point, Direction>> vision;
 
 

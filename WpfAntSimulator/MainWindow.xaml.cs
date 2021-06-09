@@ -35,7 +35,7 @@ namespace WpfAntSimulator
 
         public static List<ISimObject> toBeAdded;
 
-        public static ISimObject OriginalColony;
+        public static ISimObject OriginalColony; // The colony object
 
         public enum Direction
         {
