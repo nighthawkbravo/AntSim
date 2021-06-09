@@ -22,7 +22,7 @@ namespace WpfAntSimulator.SimObjects
         private Random rnd;
         private int multiplyer = 1;
         private int lifeSpan;
-        private int lik1 = 1;
+        private int lik1 = 2;
         private int lik2 = 3;
 
 
@@ -98,23 +98,38 @@ namespace WpfAntSimulator.SimObjects
             }
             else
             {
+                //// if there is RedTrail in my view, then I go there
+                //tmpDir = IsRedTrailInFront();
+                //if (tmpDir != Direction.center)
+                //{
+                //    dir = tmpDir;
+                //}
+
+                // if there is BlueTrail in my view, then I go there
+                if (Globals.BlueTrailsFlag)
+                {
+                    tmpDir = IsBlueTrailInFront();
+                    if (tmpDir != Direction.center)
+                    {
+                        dir = tmpDir;
+                    }
+                }
+
+
+                // Head towards nest
+                tmpDir = Globals.GetColonyDirection(Position);
+                if (tmpDir != Direction.center)
+                {
+                    dir = tmpDir;
+                    if(!Globals.CleanRoadsFlag) dir = WillIChange(dir);
+                }
+
                 // if there is RedTrail in my view, then I go there
                 tmpDir = IsRedTrailInFront();
                 if (tmpDir != Direction.center)
                 {
                     dir = tmpDir;
                 }
-
-                // if there is BlueTrail in my view, then I go there
-                tmpDir = IsBlueTrailInFront();
-                if (tmpDir != Direction.center)
-                {
-                    dir = tmpDir;
-                }
-
-                // Head towards nest
-
-
 
 
 
@@ -123,7 +138,8 @@ namespace WpfAntSimulator.SimObjects
                 {
                     hasFood = false;
                     dir = Globals.FlipDirection(dir);
-                    Globals.toBeAdded.Add(new Ant(Globals.NumToDir(rnd.Next(Globals.directions.Count)), Globals.OriginalColony.Position, new Random(Guid.NewGuid().GetHashCode())));
+                    Globals.toBeAdded.Add(new Ant(dir, Position, new Random(Guid.NewGuid().GetHashCode())));
+                    //Globals.toBeAdded.Add(new Ant(Globals.NumToDir(rnd.Next(Globals.directions.Count)), Globals.OriginalColony.Position, new Random(Guid.NewGuid().GetHashCode())));
                 }
             }
 
@@ -306,10 +322,10 @@ namespace WpfAntSimulator.SimObjects
         }
         private void UpdateTrail()
         {
-            ISimObject trail;
+            ISimObject trail = null;
             if (!hasFood)
             {
-                trail = Globals.GetBlueTrailAt(Position);
+                if(Globals.BlueTrailsFlag) trail = Globals.GetBlueTrailAt(Position);
             }
             else
             {
@@ -320,7 +336,7 @@ namespace WpfAntSimulator.SimObjects
             {
                 if (!hasFood)
                 {
-                    Globals.BlueTrailObjects.Add(new BlueTrail(Position));
+                    if (Globals.BlueTrailsFlag) Globals.BlueTrailObjects.Add(new BlueTrail(Position));
                 }
                 else
                 {
@@ -332,7 +348,7 @@ namespace WpfAntSimulator.SimObjects
             {
                 if (!hasFood)
                 {
-                    ((BlueTrail)trail).AddScent();
+                    if (Globals.BlueTrailsFlag) ((BlueTrail)trail).AddScent();
                 }
                 else
                 {
