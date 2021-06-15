@@ -41,7 +41,7 @@ namespace WpfAntSimulator.SimObjects
 
         public Ant(Direction d, Point start, Random r)
         {
-            vision = new List<Tuple<Point, Direction>>(3);
+            vision = new List<Tuple<Point, Direction>>(5);
             dir = d;
             Position = start;
             MyColor = Globals.antColor;
@@ -158,92 +158,126 @@ namespace WpfAntSimulator.SimObjects
             switch (dir)
             {
                 case Direction.west:
+                    if (IsBounds(Position.X, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y - 1), Direction.south));
                     if (IsBounds(Position.X - 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y - 1), Direction.southwest));
                     if (IsBounds(Position.X - 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y), Direction.west));
                     if (IsBounds(Position.X - 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y + 1), Direction.northwest));
+                    if (IsBounds(Position.X, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y + 1), Direction.north));
                     break;
                 case Direction.northwest:
+                    if (IsBounds(Position.X - 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y - 1), Direction.southwest));
                     if (IsBounds(Position.X - 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y), Direction.west));
                     if (IsBounds(Position.X - 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y + 1), Direction.northwest));
                     if (IsBounds(Position.X, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y + 1), Direction.north));
+                    if (IsBounds(Position.X + 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y + 1), Direction.northeast));
                     break;
                 case Direction.north:
+                    if (IsBounds(Position.X - 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y), Direction.west));
                     if (IsBounds(Position.X - 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y + 1), Direction.northwest));
                     if (IsBounds(Position.X, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y + 1), Direction.north));
                     if (IsBounds(Position.X + 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y + 1), Direction.northeast));
+                    if (IsBounds(Position.X + 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y), Direction.east));
                     break;
                 case Direction.northeast:
+                    if (IsBounds(Position.X - 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y + 1), Direction.northwest));
                     if (IsBounds(Position.X, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y + 1), Direction.north));
                     if (IsBounds(Position.X + 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y + 1), Direction.northeast));
                     if (IsBounds(Position.X + 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y), Direction.east));
+                    if (IsBounds(Position.X + 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y - 1), Direction.southeast));
                     break;
                 case Direction.east:
+                    if (IsBounds(Position.X, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y + 1), Direction.north));
                     if (IsBounds(Position.X + 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y + 1), Direction.northeast));
                     if (IsBounds(Position.X + 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y), Direction.east));
                     if (IsBounds(Position.X + 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y - 1), Direction.southeast));
+                    if (IsBounds(Position.X, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y - 1), Direction.south));
                     break;
                 case Direction.southeast:
+                    if (IsBounds(Position.X + 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y + 1), Direction.northeast));
                     if (IsBounds(Position.X + 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y), Direction.east));
                     if (IsBounds(Position.X + 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y - 1), Direction.southeast));
                     if (IsBounds(Position.X, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y - 1), Direction.south));
+                    if (IsBounds(Position.X - 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y - 1), Direction.southwest));
                     break;
                 case Direction.south:
+                    if (IsBounds(Position.X + 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y), Direction.east));
                     if (IsBounds(Position.X + 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y - 1), Direction.southeast));
                     if (IsBounds(Position.X, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y - 1), Direction.south));
                     if (IsBounds(Position.X - 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y - 1), Direction.southwest));
+                    if (IsBounds(Position.X - 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y), Direction.west));
                     break;
                 case Direction.southwest:
+                    if (IsBounds(Position.X + 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y - 1), Direction.southeast));
                     if (IsBounds(Position.X, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y - 1), Direction.south));
                     if (IsBounds(Position.X - 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y - 1), Direction.southwest));
                     if (IsBounds(Position.X - 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y), Direction.west));
+                    if (IsBounds(Position.X - 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y + 1), Direction.northwest));
                     break;
                 case Direction.center:
                     switch (prevDir)
                     {
                         case Direction.west:
+                            if (IsBounds(Position.X, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y - 1), Direction.south));
                             if (IsBounds(Position.X - 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y - 1), Direction.southwest));
                             if (IsBounds(Position.X - 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y), Direction.west));
                             if (IsBounds(Position.X - 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y + 1), Direction.northwest));
+                            if (IsBounds(Position.X, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y + 1), Direction.north));
                             break;
                         case Direction.northwest:
+                            if (IsBounds(Position.X - 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y - 1), Direction.southwest));
                             if (IsBounds(Position.X - 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y), Direction.west));
                             if (IsBounds(Position.X - 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y + 1), Direction.northwest));
                             if (IsBounds(Position.X, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y + 1), Direction.north));
+                            if (IsBounds(Position.X + 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y + 1), Direction.northeast));
                             break;
                         case Direction.north:
+                            if (IsBounds(Position.X - 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y), Direction.west));
                             if (IsBounds(Position.X - 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y + 1), Direction.northwest));
-                            if (IsBounds(Position.X, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y + 1), Direction.north));
-                            if (IsBounds(Position.X + 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y + 1), Direction.northeast));
-                            break;
-                        case Direction.northeast:
                             if (IsBounds(Position.X, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y + 1), Direction.north));
                             if (IsBounds(Position.X + 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y + 1), Direction.northeast));
                             if (IsBounds(Position.X + 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y), Direction.east));
                             break;
-                        case Direction.east:
+                        case Direction.northeast:
+                            if (IsBounds(Position.X - 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y + 1), Direction.northwest));
+                            if (IsBounds(Position.X, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y + 1), Direction.north));
                             if (IsBounds(Position.X + 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y + 1), Direction.northeast));
                             if (IsBounds(Position.X + 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y), Direction.east));
                             if (IsBounds(Position.X + 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y - 1), Direction.southeast));
                             break;
-                        case Direction.southeast:
+                        case Direction.east:
+                            if (IsBounds(Position.X, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y + 1), Direction.north));
+                            if (IsBounds(Position.X + 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y + 1), Direction.northeast));
                             if (IsBounds(Position.X + 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y), Direction.east));
                             if (IsBounds(Position.X + 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y - 1), Direction.southeast));
                             if (IsBounds(Position.X, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y - 1), Direction.south));
                             break;
-                        case Direction.south:
+                        case Direction.southeast:
+                            if (IsBounds(Position.X + 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y + 1), Direction.northeast));
+                            if (IsBounds(Position.X + 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y), Direction.east));
                             if (IsBounds(Position.X + 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y - 1), Direction.southeast));
                             if (IsBounds(Position.X, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y - 1), Direction.south));
                             if (IsBounds(Position.X - 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y - 1), Direction.southwest));
                             break;
-                        case Direction.southwest:
+                        case Direction.south:
+                            if (IsBounds(Position.X + 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y), Direction.east));
+                            if (IsBounds(Position.X + 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y - 1), Direction.southeast));
                             if (IsBounds(Position.X, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y - 1), Direction.south));
                             if (IsBounds(Position.X - 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y - 1), Direction.southwest));
                             if (IsBounds(Position.X - 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y), Direction.west));
                             break;
+                        case Direction.southwest:
+                            if (IsBounds(Position.X + 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y - 1), Direction.southeast));
+                            if (IsBounds(Position.X, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y - 1), Direction.south));
+                            if (IsBounds(Position.X - 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y - 1), Direction.southwest));
+                            if (IsBounds(Position.X - 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y), Direction.west));
+                            if (IsBounds(Position.X - 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X - 1, Position.Y + 1), Direction.northwest));
+                            break;
                         case Direction.center: // Default to east if the center direction occurs twice.
+                            if (IsBounds(Position.X, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y + 1), Direction.north));
                             if (IsBounds(Position.X + 1, Position.Y + 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y + 1), Direction.northeast));
                             if (IsBounds(Position.X + 1, Position.Y)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y), Direction.east));
                             if (IsBounds(Position.X + 1, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X + 1, Position.Y - 1), Direction.southeast));
+                            if (IsBounds(Position.X, Position.Y - 1)) vision.Add(new Tuple<Point, Direction>(new Point(Position.X, Position.Y - 1), Direction.south));
                             break;
                     }
                     break;
