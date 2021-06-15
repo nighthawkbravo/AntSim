@@ -18,6 +18,7 @@ namespace WpfAntSimulator.SimObjects
         public Point PrevPosition { get; set; } // Maybe this won't be neccessary
 
         private Queue<Point> prevPoints;
+        private Queue<bool> prevObstacleViews;
 
         private const int width = 1127;
         private const int height = 814; // 814
@@ -45,6 +46,7 @@ namespace WpfAntSimulator.SimObjects
         {
             vision = new List<Tuple<Point, Direction>>(5);
             prevPoints = new Queue<Point>(10);
+            prevObstacleViews = new Queue<bool>(10);
             dir = d;
             Position = start;
             MyColor = Globals.antColor;
@@ -73,8 +75,10 @@ namespace WpfAntSimulator.SimObjects
 
             GetVisionPoints(); // 2.) Get up to 3 points in view of the ant.
 
+            AddPrevViewObstacle(bm);
 
-            if(IsFoodPixel(Position, bm) && hasFood == false)
+
+            if (IsFoodPixel(Position, bm) && hasFood == false)
             {
                 var food = Globals.GetFoodAt(Position);
                 ((Food) food).FoodAmount--;
@@ -101,12 +105,7 @@ namespace WpfAntSimulator.SimObjects
             }
             else
             {
-                //// if there is RedTrail in my view, then I go there
-                //tmpDir = IsRedTrailInFront();
-                //if (tmpDir != Direction.center)
-                //{
-                //    dir = tmpDir;
-                //}
+                
 
                 // if there is BlueTrail in my view, then I go there
                 if (Globals.BlueTrailsFlag)
@@ -135,7 +134,7 @@ namespace WpfAntSimulator.SimObjects
                 }
 
                 // if there is BlueTrail in my view, then I go there
-                //if (Globals.BlueTrailsFlag && InPrevPoints(PrevPosition))
+                //if (Globals.BlueTrailsFlag && (IsObstacleInView(bm) || IsObstacleInPrev(bm)))
                 //{
                 //    tmpDir = IsBlueTrailInFront();
                 //    if (tmpDir != Direction.center)
@@ -144,6 +143,11 @@ namespace WpfAntSimulator.SimObjects
                 //    }
                 //}
 
+                //tmpDir = IsRedTrailInFront();
+                //if (tmpDir != Direction.center && CloserToHome())
+                //{
+                //    dir = tmpDir;
+                //}
 
                 // Drops off food and creates an ant
                 if (Globals.IsInColony(Position))
@@ -333,6 +337,43 @@ namespace WpfAntSimulator.SimObjects
             return tmp;
         }
 
+        private bool IsObstacleInView(Bitmap bm)
+        {
+            foreach(var p in vision)
+            {
+                if(IsObstacle(p.Item1, bm))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private void AddPrevViewObstacle(Bitmap bm)
+        {
+            if (prevObstacleViews.Count > 9) prevObstacleViews.Dequeue();
+            prevObstacleViews.Enqueue(IsObstacleInView(bm));
+        }
+
+        private bool IsObstacleInPrev(Bitmap bm)
+        {
+            foreach (var b in prevObstacleViews)
+            {
+                if (b)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private bool CloserToHome()
+        {
+            if (CalcEucliDist(Position, Globals.OriginalColony.Position) < CalcEucliDist(PrevPosition, Globals.OriginalColony.Position))
+                return true;
+            return false;
+        }
+
 
         private Direction WillIChange(Direction d)
         {
@@ -509,5 +550,11 @@ namespace WpfAntSimulator.SimObjects
             if (!(j >= 0 && j < height)) return false;
             return true;
         }
+
+        private double CalcEucliDist(Point p1, Point p2)
+        {
+            return Math.Sqrt(Math.Pow(p2.Y - p1.Y, 2) + Math.Pow(p2.X - p1.X, 2));
+        }
+
     }
 }
