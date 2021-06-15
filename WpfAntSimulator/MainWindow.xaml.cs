@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -27,7 +28,7 @@ namespace WpfAntSimulator
         public static readonly Color blueTrailColor = Color.Blue;
         public static readonly Color redTrailColor = Color.Red;
 
-        public static bool CleanRoadsFlag = true;
+        public static bool CleanRoadsFlag = false;
         public static bool BlueTrailsFlag = true;        
 
         public static List<ISimObject> simObjects;
@@ -168,6 +169,7 @@ namespace WpfAntSimulator
         public delegate void nextSimulationTick();
         private bool continueCalculating;
         private bool simInit = false;
+        Stopwatch stopwatch = new Stopwatch();
 
         private Random rnd;
 
@@ -204,7 +206,7 @@ namespace WpfAntSimulator
             RenderStatics();
             RenderAll();
 
-            CleanButton.Background = (System.Windows.Media.Brush)bc.ConvertFrom(mylightGreen);
+            CleanButton.Background = (System.Windows.Media.Brush)bc.ConvertFrom(mylightRed);
             BTrailsButton.Background = (System.Windows.Media.Brush)bc.ConvertFrom(mylightGreen);
         }
 
@@ -381,6 +383,7 @@ namespace WpfAntSimulator
         // This function is the engine.
         public void RunNextTick()
         {
+            stopwatch.Start();
             if (!simInit)
             {
                 InitSim();
@@ -394,8 +397,14 @@ namespace WpfAntSimulator
 
 
             tick++;
+            if (tick % 15 == 0)
+            {
+                stopwatch.Stop();
+                TPS.Text = $"{(1 / stopwatch.Elapsed.TotalSeconds):0.##}";
+                stopwatch.Reset();
+            }
             ticker.Text = tick.ToString();
-            System.Threading.Thread.Sleep(10);
+            //System.Threading.Thread.Sleep(10);
             if (continueCalculating)
             {
                 StartOrStopButton.Dispatcher.BeginInvoke(
@@ -566,6 +575,7 @@ namespace WpfAntSimulator
             {
                 Globals.BlueTrailsFlag = false;
                 BTrailsButton.Background = (System.Windows.Media.Brush)bc.ConvertFrom(mylightRed);
+                Globals.BlueTrailObjects.Clear();
             }
             else
             {

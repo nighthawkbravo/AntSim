@@ -17,6 +17,8 @@ namespace WpfAntSimulator.SimObjects
     {
         public Point PrevPosition { get; set; } // Maybe this won't be neccessary
 
+        private Queue<Point> prevPoints;
+
         private const int width = 1127;
         private const int height = 814; // 814
         private Random rnd;
@@ -42,11 +44,12 @@ namespace WpfAntSimulator.SimObjects
         public Ant(Direction d, Point start, Random r)
         {
             vision = new List<Tuple<Point, Direction>>(5);
+            prevPoints = new Queue<Point>(10);
             dir = d;
             Position = start;
             MyColor = Globals.antColor;
             rnd = r;
-            lifeSpan = r.Next(1, 201)*20;
+            lifeSpan = r.Next(1, 201)*40;
             prevDir = dir;
         }
 
@@ -131,6 +134,15 @@ namespace WpfAntSimulator.SimObjects
                     dir = tmpDir;
                 }
 
+                // if there is BlueTrail in my view, then I go there
+                //if (Globals.BlueTrailsFlag && InPrevPoints(PrevPosition))
+                //{
+                //    tmpDir = IsBlueTrailInFront();
+                //    if (tmpDir != Direction.center)
+                //    {
+                //        dir = tmpDir;
+                //    }
+                //}
 
 
                 // Drops off food and creates an ant
@@ -425,6 +437,7 @@ namespace WpfAntSimulator.SimObjects
         }
         private void UpdatePos(int x, int y, Bitmap bm)
         {
+            PrevPosition = Position;
             if (IsBounds(Position.X + x * multiplyer, Position.Y) && !IsObstacle(Position.X + x * multiplyer, Position.Y, bm))
             {
                 Position = new Point(Position.X + x * multiplyer, Position.Y);
@@ -433,6 +446,18 @@ namespace WpfAntSimulator.SimObjects
             {
                 Position = new Point(Position.X, Position.Y + y * multiplyer);
             }
+            
+            if (prevPoints.Count > 9) prevPoints.Dequeue();
+            prevPoints.Enqueue(Position);
+        }
+
+        private bool InPrevPoints(Point p)
+        {
+            foreach(var po in prevPoints)
+            {
+                if (po.X == p.X && po.Y == p.Y) return true;
+            }
+            return false;
         }
 
 
