@@ -46,7 +46,7 @@ namespace WpfAntSimulator.SimObjects
         {
             vision = new List<Tuple<Point, Direction>>(5);
             prevPoints = new Queue<Point>(10);
-            prevObstacleViews = new Queue<bool>(10);
+            prevObstacleViews = new Queue<bool>(6);
             dir = d;
             Position = start;
             MyColor = Globals.antColor;
@@ -134,14 +134,14 @@ namespace WpfAntSimulator.SimObjects
                 }
 
                 // if there is BlueTrail in my view, then I go there
-                //if (Globals.BlueTrailsFlag && (IsObstacleInView(bm) || IsObstacleInPrev(bm)))
-                //{
-                //    tmpDir = IsBlueTrailInFront();
-                //    if (tmpDir != Direction.center)
-                //    {
-                //        dir = tmpDir;
-                //    }
-                //}
+                if (Globals.BlueTrailsFlag && (IsObstacleInView(bm) || IsObstacleInPrev(bm)))
+                {
+                    tmpDir = IsBlueTrailInFront();
+                    if (tmpDir != Direction.center)
+                    {
+                        dir = tmpDir;
+                    }
+                }
 
                 //tmpDir = IsRedTrailInFront();
                 //if (tmpDir != Direction.center && CloserToHome())
@@ -351,7 +351,7 @@ namespace WpfAntSimulator.SimObjects
 
         private void AddPrevViewObstacle(Bitmap bm)
         {
-            if (prevObstacleViews.Count > 9) prevObstacleViews.Dequeue();
+            if (prevObstacleViews.Count > 5) prevObstacleViews.Dequeue();
             prevObstacleViews.Enqueue(IsObstacleInView(bm));
         }
 
